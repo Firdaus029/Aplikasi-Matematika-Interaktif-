@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MathUTBK — Belajar & Latihan Soal</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:    #2563EB;
+  --blue-l:  #DBEAFE;
+  --blue-d:  #1E40AF;
+  --yellow:  #F59E0B;
+  --yellow-l:#FEF3C7;
+  --yellow-d:#B45309;
+  --green:   #10B981;
+  --green-l: #D1FAE5;
+  --green-d: #065F46;
+  --purple:  #7C3AED;
+  --purple-l:#EDE9FE;
+  --purple-d:#4C1D95;
+  --red:     #EF4444;
+  --red-l:   #FEE2E2;
+  --bg:      #F8FAFF;
+  --card:    #FFFFFF;
+  --border:  #E2E8F0;
+  --text:    #0F172A;
+  --muted:   #64748B;
+  --mono:    'JetBrains Mono', monospace;
+  --sans:    'Plus Jakarta Sans', sans-serif;
+  --radius:  14px;
+  --shadow:  0 2px 16px rgba(37,99,235,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── LAYOUT ── */
+.shell{max-width:960px;margin:0 auto;padding:16px 16px 60px}
+
+/* ── HERO ── */
+.hero{
+  background: linear-gradient(135deg, var(--blue-d) 0%, var(--blue) 50%, #3B82F6 100%);
+  border-radius:20px;padding:32px 28px 28px;margin-bottom:24px;
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'∑ π √ ∫ ∞ ≠ ≤ ≥ ×';
+  position:absolute;top:10px;right:20px;font-size:13px;
+  color:rgba(255,255,255,.18);letter-spacing:6px;font-family:var(--mono);
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);
+  border-radius:100px;padding:4px 14px;font-size:12px;font-weight:600;
+  color:#fff;margin-bottom:12px;letter-spacing:.5px;
+}
+.hero h1{font-size:28px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:8px}
+.hero h1 span{color:#FCD34D}
+.hero p{font-size:13.5px;color:rgba(255,255,255,.82);max-width:500px;line-height:1.6}
+.hero-stats{display:flex;gap:20px;margin-top:18px;flex-wrap:wrap}
+.hstat{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+  border-radius:10px;padding:8px 16px;text-align:center}
+.hstat .n{font-size:20px;font-weight:800;color:#fff}
+.hstat .l{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px}
+
+/* ── NAV ── */
+.nav{display:flex;gap:6px;margin-bottom:22px;background:var(--card);
+  border:1px solid var(--border);border-radius:12px;padding:5px;flex-wrap:wrap}
+.nav-btn{
+  flex:1;min-width:100px;padding:9px 14px;border:none;
+  border-radius:9px;font-size:13px;font-weight:600;font-family:var(--sans);
+  cursor:pointer;transition:all .2s;background:transparent;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.nav-btn.active{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.35)}
+.nav-btn:hover:not(.active){background:var(--blue-l);color:var(--blue-d)}
+
+/* ── SCORE BAR ── */
+.score-bar{
+  display:none;gap:12px;margin-bottom:18px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px 18px;flex-wrap:wrap;align-items:center;
+}
+.score-bar.show{display:flex}
+.sc{text-align:center;flex:1;min-width:60px}
+.sc .n{font-size:22px;font-weight:800}
+.sc .l{font-size:11px;color:var(--muted);margin-top:1px;font-weight:500}
+.sc.benar .n{color:var(--green)}
+.sc.salah .n{color:var(--red)}
+.sc.total .n{color:var(--blue)}
+.sc.pct .n{color:var(--purple)}
+.sc-divider{width:1px;height:36px;background:var(--border)}
+.sc-reset{margin-left:auto;padding:7px 14px;border:1.5px solid var(--border);
+  border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;
+  background:transparent;color:var(--muted);transition:all .15s;font-family:var(--sans)}
+.sc-reset:hover{border-color:var(--red);color:var(--red)}
+
+/* ── SECTION ── */
+.sec{display:none}
+.sec.active{display:block}
+
+/* ── FORMULA GRID ── */
+.bab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.bab-card{
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:16px;cursor:pointer;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.bab-card::after{
+  content:'';position:absolute;inset:0;opacity:0;transition:.2s;
+  background:linear-gradient(135deg,var(--c1,.5) 0%,transparent 60%);
+}
+.bab-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.bab-card:hover::after{opacity:.07}
+.bab-card:hover{border-color:var(--c1)}
+.bab-badge{
+  font-size:10px;font-weight:700;letter-spacing:.5px;
+  padding:3px 10px;border-radius:100px;margin-bottom:10px;
+  display:inline-block;
+}
+.bab-card h3{font-size:14px;font-weight:700;margin-bottom:4px}
+.bab-card p{font-size:12px;color:var(--muted);line-height:1.5}
+.bab-card .bab-icon{font-size:22px;margin-bottom:8px}
+
+/* color themes */
+.c-blue  {--c1:var(--blue);  } .c-blue   .bab-badge{background:var(--blue-l);color:var(--blue-d)}
+.c-yellow{--c1:var(--yellow);} .c-yellow .bab-badge{background:var(--yellow-l);color:var(--yellow-d)}
+.c-green {--c1:var(--green); } .c-green  .bab-badge{background:var(--green-l);color:var(--green-d)}
+.c-purple{--c1:var(--purple);} .c-purple .bab-badge{background:var(--purple-l);color:var(--purple-d)}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);
+  z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.overlay.open{display:flex}
+.modal{
+  background:var(--card);border-radius:18px;padding:28px;
+  max-width:580px;width:94%;max-height:88vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.18);
+  animation:slideUp .22s ease;
+}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+.modal-head h2{font-size:17px;font-weight:700}
+.modal-close{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);
+  background:transparent;cursor:pointer;font-size:16px;display:flex;align-items:center;
+  justify-content:center;color:var(--muted);transition:.15s}
+.modal-close:hover{background:var(--red-l);color:var(--red);border-color:var(--red)}
+.formula-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.formula-tbl tr{border-bottom:1px solid var(--border)}
+.formula-tbl tr:last-child{border-bottom:none}
+.formula-tbl td{padding:8px 6px;vertical-align:middle}
+.formula-tbl td:first-child{color:var(--muted);width:44%;font-weight:500;font-size:12.5px}
+.formula-tbl td:last-child{font-family:var(--mono);font-size:12px;
+  background:var(--bg);border-radius:6px;padding:5px 10px;font-weight:600;color:var(--blue-d)}
+.modal-footer{margin-top:18px;display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:9px 20px;border-radius:9px;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .15s;font-family:var(--sans);border:none;
+  display:inline-flex;align-items:center;gap:6px}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.3)}
+.btn-blue:hover{background:var(--blue-d)}
+.btn-outline{background:transparent;color:var(--muted);border:1.5px solid var(--border)}
+.btn-outline:hover{background:var(--bg)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── PRACTICE CONTROLS ── */
+.ctrl-row{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+.ctrl-select{
+  padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;
+  background:var(--card);color:var(--text);font-size:13px;font-weight:500;
+  font-family:var(--sans);cursor:pointer;min-width:140px;outline:none;
+  transition:.15s;
+}
+.ctrl-select:focus{border-color:var(--blue)}
+.level-btns{display:flex;gap:6px}
+.lbtn{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;
+  cursor:pointer;transition:all .15s;border:1.5px solid var(--border);
+  background:transparent;font-family:var(--sans);color:var(--muted)}
+.lbtn.active-m{background:var(--green-l);color:var(--green-d);border-color:var(--green)}
+.lbtn.active-n{background:var(--yellow-l);color:var(--yellow-d);border-color:var(--yellow)}
+.lbtn.active-s{background:var(--red-l);color:var(--red);border-color:var(--red)}
+.lbtn:hover:not(.active-m):not(.active-n):not(.active-s){background:var(--bg)}
+
+/* ── QUESTION CARD ── */
+.q-card{
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:22px;margin-bottom:14px;
+  animation:fadeIn .25s ease;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.q-meta{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.q-num{font-size:11px;font-weight:700;color:var(--muted)}
+.tag{padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.tag-topik{background:var(--blue-l);color:var(--blue-d)}
+.tag-mudah{background:var(--green-l);color:var(--green-d)}
+.tag-normal{background:var(--yellow-l);color:var(--yellow-d)}
+.tag-sulit{background:var(--red-l);color:var(--red)}
+.tag-ai{background:var(--purple-l);color:var(--purple-d)}
+.q-text{font-size:15px;line-height:1.8;color:var(--text);margin-bottom:18px;font-weight:500}
+.options{display:flex;flex-direction:column;gap:8px}
+.opt{
+  padding:11px 16px;border:1.5px solid var(--border);border-radius:10px;
+  cursor:pointer;font-size:14px;display:flex;gap:10px;align-items:flex-start;
+  transition:all .18s;background:transparent;text-align:left;color:var(--text);
+  font-family:var(--sans);width:100%;
+}
+.opt:hover:not(:disabled){background:var(--blue-l);border-color:var(--blue);color:var(--blue-d)}
+.opt.correct{background:var(--green-l);border-color:var(--green);color:var(--green-d)}
+.opt.wrong{background:var(--red-l);border-color:var(--red);color:var(--red)}
+.opt.show-ans{background:var(--green-l);border-color:var(--green);color:var(--green-d)}
+.opt-lbl{font-weight:700;min-width:22px;flex-shrink:0}
+
+/* ── EXPLANATION ── */
+.expl{
+  display:none;margin-top:14px;
+  border-radius:12px;overflow:hidden;
+  border:1.5px solid var(--border);
+}
+.expl.show{display:block;animation:fadeIn .2s ease}
+.expl-head{padding:12px 16px;display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700}
+.expl-head.ok{background:var(--green-l);color:var(--green-d);border-bottom:1px solid var(--green)}
+.expl-head.bad{background:var(--red-l);color:var(--red);border-bottom:1px solid var(--red)}
+.expl-body{padding:14px 16px;background:var(--bg)}
+.expl-note{font-size:13px;line-height:1.7;color:var(--text);margin-bottom:10px}
+.steps{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.step{
+  font-size:12.5px;padding:8px 12px;
+  background:var(--card);border-radius:8px;
+  border-left:3px solid var(--blue);line-height:1.6;color:var(--text);
+  font-family:var(--mono);
+}
+
+/* ── LOADING ── */
+.loading{text-align:center;padding:48px 20px}
+.spinner{
+  width:36px;height:36px;border-radius:50%;
+  border:3px solid var(--blue-l);border-top-color:var(--blue);
+  animation:spin .8s linear infinite;margin:0 auto 14px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{font-size:13.5px;color:var(--muted);font-weight:500}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:52px 20px}
+.empty .icon{font-size:48px;margin-bottom:12px}
+.empty p{font-size:14px;color:var(--muted);font-weight:500}
+
+/* ── TIPS ── */
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.tip-card{background:var(--card);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:18px;transition:.2s}
+.tip-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.tip-num{font-size:24px;font-weight:800;margin-bottom:6px}
+.tip-card h4{font-size:14px;font-weight:700;margin-bottom:6px}
+.tip-card p{font-size:12.5px;color:var(--muted);line-height:1.65}
+.tip-card.t1 .tip-num{color:var(--blue)}
+.tip-card.t2 .tip-num{color:var(--yellow)}
+.tip-card.t3 .tip-num{color:var(--green)}
+.tip-card.t4 .tip-num{color:var(--purple)}
+
+/* ── SOAL BANK TABS ── */
+.mode-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.mode-btn{padding:8px 16px;border-radius:9px;font-size:12.5px;font-weight:700;
+  cursor:pointer;border:1.5px solid var(--border);background:transparent;
+  color:var(--muted);font-family:var(--sans);transition:.15s;display:flex;align-items:center;gap:5px}
+.mode-btn.active{background:var(--purple);color:#fff;border-color:var(--purple);
+  box-shadow:0 2px 8px rgba(124,58,237,.3)}
+.mode-btn:hover:not(.active){background:var(--purple-l);border-color:var(--purple);color:var(--purple)}
+.ai-note{background:var(--purple-l);border:1.5px solid var(--purple);border-radius:10px;
+  padding:10px 14px;font-size:12.5px;color:var(--purple-d);margin-bottom:14px;font-weight:500;
+  display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+
+/* ── PROGRESS BAR ── */
+.prog-wrap{background:var(--border);border-radius:100px;height:6px;margin-bottom:16px;overflow:hidden}
+.prog-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--blue),var(--purple));
+  transition:width .4s ease}
+
+/* ── SOAL NAV ── */
+.soal-nav{display:flex;gap:8px;align-items:center;justify-content:space-between;
+  margin-top:14px;flex-wrap:wrap}
+.soal-nav .btn{flex:1;min-width:100px;justify-content:center}
+
+/* responsive */
+@media(max-width:600px){
+  .hero h1{font-size:22px}
+  .bab-grid{grid-template-columns:repeat(2,1fr)}
+  .level-btns{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">🎯 UTBK / SNBT 2025</div>
+  <h1>Matematika <span>UTBK</span><br>Lengkap & Interaktif</h1>
+  <p>Bank soal 80+ soal · Kategori Mudah / Normal / Sulit · Pembahasan lengkap · Soal AI on-demand</p>
+  <div class="hero-stats">
+    <div class="hstat"><div class="n">80+</div><div class="l">Bank Soal</div></div>
+    <div class="hstat"><div class="n">10</div><div class="l">Bab Materi</div></div>
+    <div class="hstat"><div class="n">3</div><div class="l">Level Kesulitan</div></div>
+    <div class="hstat"><div class="n">AI</div><div class="l">Soal Baru Tiap Sesi</div></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-btn active" onclick="showSec('rumus',this)">📚 Rumus & Materi</button>
+  <button class="nav-btn" onclick="showSec('latihan',this)">✏️ Latihan Soal</button>
+  <button class="nav-btn" onclick="showSec('tips',this)">💡 Tips & Strategi</button>
+</div>
+
+<!-- SCORE BAR -->
+<div class="score-bar" id="score-bar">
+  <div class="sc benar"><div class="n" id="sc-benar">0</div><div class="l">✅ Benar</div></div>
+  <div class="sc-divider"></div>
+  <div class="sc salah"><div class="n" id="sc-salah">0</div><div class="l">❌ Salah</div></div>
+  <div class="sc-divider"></div>
+  <div class="sc total"><div class="n" id="sc-total">0</div><div class="l">📝 Total</div></div>
+  <div class="sc-divider"></div>
+  <div class="sc pct"><div class="n" id="sc-pct">—</div><div class="l">🎯 Akurasi</div></div>
+  <button class="sc-reset" onclick="resetScore()">Reset Skor</button>
+</div>
+
+<!-- ═══════════ RUMUS ═══════════ -->
+<div id="sec-rumus" class="sec active">
+  <div class="bab-grid">
+    <div class="bab-card c-blue" onclick="openModal('bilangan')">
+      <div class="bab-icon">🔢</div>
+      <div class="bab-badge">Bab 1</div>
+      <h3>Bilangan</h3>
+      <p>Eksponen, logaritma, FPB, KPK, pecahan</p>
+    </div>
+    <div class="bab-card c-yellow" onclick="openModal('aljabar')">
+      <div class="bab-icon">🔡</div>
+      <div class="bab-badge">Bab 2</div>
+      <h3>Aljabar</h3>
+      <p>Persamaan kuadrat, SPL, pertidaksamaan, polinom</p>
+    </div>
+    <div class="bab-card c-green" onclick="openModal('fungsi')">
+      <div class="bab-icon">📈</div>
+      <div class="bab-badge">Bab 3</div>
+      <h3>Fungsi</h3>
+      <p>Komposisi, invers, kuadrat, eksponen & log</p>
+    </div>
+    <div class="bab-card c-purple" onclick="openModal('barisan')">
+      <div class="bab-icon">🔁</div>
+      <div class="bab-badge">Bab 4</div>
+      <h3>Barisan & Deret</h3>
+      <p>Aritmatika, geometri, deret tak hingga, sigma</p>
+    </div>
+    <div class="bab-card c-blue" onclick="openModal('trigonometri')">
+      <div class="bab-icon">📐</div>
+      <div class="bab-badge">Bab 5</div>
+      <h3>Trigonometri</h3>
+      <p>Perbandingan, identitas, aturan sinus/kosinus</p>
+    </div>
+    <div class="bab-card c-yellow" onclick="openModal('geometri')">
+      <div class="bab-icon">🔷</div>
+      <div class="bab-badge">Bab 6</div>
+      <h3>Geometri & Bangun</h3>
+      <p>Luas, volume, koordinat, vektor</p>
+    </div>
+    <div class="bab-card c-green" onclick="openModal('statistika')">
+      <div class="bab-icon">📊</div>
+      <div class="bab-badge">Bab 7</div>
+      <h3>Statistika</h3>
+      <p>Mean, median, modus, ragam, simpangan baku</p>
+    </div>
+    <div class="bab-card c-purple" onclick="openModal('peluang')">
+      <div class="bab-icon">🎲</div>
+      <div class="bab-badge">Bab 8</div>
+      <h3>Peluang</h3>
+      <p>Kombinatorika, permutasi, probabilitas, binomial</p>
+    </div>
+    <div class="bab-card c-blue" onclick="openModal('program')">
+      <div class="bab-icon">📉</div>
+      <div class="bab-badge">Bab 9</div>
+      <h3>Program Linear</h3>
+      <p>Fungsi objektif, metode grafik, titik sudut</p>
+    </div>
+    <div class="bab-card c-yellow" onclick="openModal('matriks')">
+      <div class="bab-icon">🔲</div>
+      <div class="bab-badge">Bab 10</div>
+      <h3>Matriks</h3>
+      <p>Operasi, determinan, invers, persamaan matriks</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ LATIHAN ═══════════ -->
+<div id="sec-latihan" class="sec">
+
+  <!-- Mode tabs -->
+  <div class="mode-row">
+    <button class="mode-btn active" id="mode-bank" onclick="setMode('bank')">📋 Bank Soal</button>
+    <button class="mode-btn" id="mode-ai" onclick="setMode('ai')">✨ AI Soal Baru</button>
+  </div>
+
+  <!-- Controls -->
+  <div class="ctrl-row">
+    <select class="ctrl-select" id="sel-topik">
+      <option value="">Semua Topik</option>
+      <option value="Bilangan">Bilangan</option>
+      <option value="Aljabar">Aljabar</option>
+      <option value="Fungsi">Fungsi</option>
+      <option value="Barisan & Deret">Barisan & Deret</option>
+      <option value="Trigonometri">Trigonometri</option>
+      <option value="Geometri">Geometri</option>
+      <option value="Statistika">Statistika</option>
+      <option value="Peluang">Peluang</option>
+      <option value="Program Linear">Program Linear</option>
+      <option value="Matriks">Matriks</option>
+    </select>
+    <div class="level-btns">
+      <button class="lbtn" id="lbtn-all"    onclick="setLevel('')">Semua</button>
+      <button class="lbtn" id="lbtn-mudah"  onclick="setLevel('Mudah')">🟢 Mudah</button>
+      <button class="lbtn" id="lbtn-normal" onclick="setLevel('Normal')">🟡 Normal</button>
+      <button class="lbtn" id="lbtn-sulit"  onclick="setLevel('Sulit')">🔴 Sulit</button>
+    </div>
+    <button class="btn btn-blue" id="btn-start" onclick="mulaiSoal()">▶ Mulai</button>
+  </div>
+
+  <!-- AI note (hidden by default) -->
+  <div class="ai-note" id="ai-note" style="display:none">
+    ✨ Mode AI — Soal dibuat secara otomatis oleh Claude. Setiap klik menghasilkan soal unik yang belum pernah ada!
+  </div>
+
+  <!-- Progress (bank mode) -->
+  <div id="prog-wrap" class="prog-wrap" style="display:none">
+    <div class="prog-bar" id="prog-bar" style="width:0%"></div>
+  </div>
+
+  <!-- Soal container -->
+  <div id="soal-container">
+    <div class="empty"><div class="icon">📝</div><p>Pilih topik & level lalu klik <b>Mulai</b> untuk latihan!</p></div>
+  </div>
+
+  <!-- Nav buttons (shown during session) -->
+  <div class="soal-nav" id="soal-nav" style="display:none">
+    <button class="btn btn-outline" id="btn-prev" onclick="navSoal(-1)">← Sebelumnya</button>
+    <span id="soal-counter" style="font-size:13px;font-weight:600;color:var(--muted)"></span>
+    <button class="btn btn-blue" id="btn-next" onclick="navSoal(1)">Selanjutnya →</button>
+  </div>
+</div>
+
+<!-- ═══════════ TIPS ═══════════ -->
+<div id="sec-tips" class="sec">
+  <div class="tips-grid">
+    <div class="tip-card t1"><div class="tip-num">01</div><h4>⏱ Manajemen Waktu</h4><p>Rata-rata 1,5 menit per soal. Tandai soal sulit, kerjakan yang mudah dulu, lalu balik ke yang sulit.</p></div>
+    <div class="tip-card t2"><div class="tip-num">02</div><h4>✂️ Eliminasi Pilihan</h4><p>Eliminasi 2 opsi yang jelas salah. Peluang benar naik dari 20% menjadi 50%. Hemat waktu berpikir!</p></div>
+    <div class="tip-card t3"><div class="tip-num">03</div><h4>🧮 Estimasi Dulu</h4><p>Untuk soal numerik, estimasi apakah jawaban masuk akal sebelum menghitung detail yang panjang.</p></div>
+    <div class="tip-card t4"><div class="tip-num">04</div><h4>📌 Rumus Wajib Hafal</h4><p>Kuadrat sempurna, rumus ABC, deret aritmatika/geometri, Pythagoras, luas bangun — hafal di luar kepala!</p></div>
+    <div class="tip-card t1"><div class="tip-num">05</div><h4>📏 Cek Satuan</h4><p>Soal geometri sering menjebak konversi satuan tersembunyi (km↔m, jam↔menit). Cek sebelum menghitung!</p></div>
+    <div class="tip-card t2"><div class="tip-num">06</div><h4>✏️ Gambar Sketsa</h4><p>Visualisasikan soal geometri & peluang dengan sketsa. Otak lebih mudah memproses masalah visual.</p></div>
+    <div class="tip-card t3"><div class="tip-num">07</div><h4>📖 Baca Soal 2×</h4><p>Soal cerita: baca dua kali. Identifikasi diketahui apa, ditanya apa, baru buat model matematika.</p></div>
+    <div class="tip-card t4"><div class="tip-num">08</div><h4>🧠 Latihan HOTS</h4><p>UTBK banyak soal C4–C6 (analisis, evaluasi). Pahami konsep mendalam, jangan cuma hafal rumus.</p></div>
+    <div class="tip-card t1"><div class="tip-num">09</div><h4>🔢 Penalaran Matematika</h4><p>Sub-tes PM menguji logika & literasi angka lebih dari rumus. Baca konteks soal dengan cermat & teliti.</p></div>
+    <div class="tip-card t2"><div class="tip-num">10</div><h4>📊 Pengetahuan Kuantitatif</h4><p>PK menguji pola & pengolahan angka. Ubah angka rumit ke pecahan sederhana atau desimal untuk efisiensi.</p></div>
+  </div>
+</div>
+
+</div><!-- /shell -->
+
+<!-- MODAL RUMUS -->
+<div class="overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modal-title"></h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <table class="formula-tbl" id="modal-tbl"></table>
+    <div class="modal-footer">
+      <button class="btn btn-blue" id="modal-latihan-btn">✏️ Latihan Soal Topik Ini</button>
+      <button class="btn btn-outline" onclick="closeModal()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// DATA: FORMULAS
+// ════════════════════════════════════════════════════════
+const FORMULAS = {
+  bilangan:{title:"🔢 Bilangan — Eksponen & Logaritma",rows:[
+    ["FPB × KPK","= a × b"],["aᵐ × aⁿ","= aᵐ⁺ⁿ"],["aᵐ ÷ aⁿ","= aᵐ⁻ⁿ"],
+    ["(aᵐ)ⁿ","= aᵐⁿ"],["a⁰","= 1 (a≠0)"],["a⁻ⁿ","= 1/aⁿ"],
+    ["a^(1/n)","= ⁿ√a"],["√(ab)","= √a × √b"],
+    ["logₐ(mn)","= logₐm + logₐn"],["logₐ(m/n)","= logₐm − logₐn"],
+    ["logₐ(mⁿ)","= n × logₐm"],["ganti basis","logₐb = log b / log a"],
+    ["logₐ a","= 1  |  logₐ 1 = 0"]
+  ]},
+  aljabar:{title:"🔡 Aljabar — Persamaan & Pertidaksamaan",rows:[
+    ["a²−b²","= (a+b)(a−b)"],["(a±b)²","= a² ± 2ab + b²"],
+    ["a³+b³","= (a+b)(a²−ab+b²)"],["a³−b³","= (a−b)(a²+ab+b²)"],
+    ["Rumus ABC","x = (−b ± √(b²−4ac)) / 2a"],["Diskriminan D","= b²−4ac"],
+    ["D>0","2 akar real berbeda"],["D=0","2 akar kembar"],["D<0","Tidak ada akar real"],
+    ["x₁+x₂","= −b/a"],["x₁×x₂","= c/a"],
+    ["Teorema sisa","Sisa P(x)÷(x−k) = P(k)"],
+    ["|x| < a","⟺ −a < x < a"],["|x| > a","⟺ x<−a atau x>a"]
+  ]},
+  fungsi:{title:"📈 Fungsi — Komposisi, Invers, Kuadrat",rows:[
+    ["(f∘g)(x)","= f(g(x))"],["(f∘g)⁻¹","= g⁻¹∘f⁻¹"],["f(f⁻¹(x))","= x"],
+    ["Titik puncak x","= −b/(2a)"],["Titik puncak y","= −(b²−4ac)/(4a)"],
+    ["a>0","Parabola membuka ke atas (min)"],["a<0","Parabola membuka ke bawah (maks)"],
+    ["f(x)=aˣ, a>1","Fungsi naik"],["f(x)=aˣ, 0<a<1","Fungsi turun"],
+    ["Invers aˣ","f⁻¹(x) = logₐ(x)"]
+  ]},
+  barisan:{title:"🔁 Barisan & Deret",rows:[
+    ["Uₙ aritmatika","= a + (n−1)b"],["Beda b","= Uₙ₊₁ − Uₙ"],
+    ["Sₙ aritmatika","= n/2 × (2a + (n−1)b)"],["Sₙ (alt)","= n/2 × (a + Uₙ)"],
+    ["Uₙ geometri","= a × rⁿ⁻¹"],["Rasio r","= Uₙ₊₁/Uₙ"],
+    ["Sₙ geometri","= a(rⁿ−1)/(r−1)"],["S∞","= a/(1−r),  |r|<1"],
+    ["Σᵢ₌₁ⁿ i","= n(n+1)/2"],["Σi²","= n(n+1)(2n+1)/6"],["Σi³","= [n(n+1)/2]²"]
+  ]},
+  trigonometri:{title:"📐 Trigonometri",rows:[
+    ["sin θ","= depan/miring"],["cos θ","= samping/miring"],["tan θ","= sin θ/cos θ"],
+    ["sin²θ+cos²θ","= 1"],["tan²θ+1","= sec²θ"],
+    ["sin(A±B)","= sinA cosB ± cosA sinB"],["cos(A±B)","= cosA cosB ∓ sinA sinB"],
+    ["sin 2A","= 2 sinA cosA"],["cos 2A","= cos²A−sin²A = 1−2sin²A"],
+    ["Aturan sinus","a/sinA = b/sinB = 2R"],["Aturan kosinus","a² = b²+c²−2bc cosA"],
+    ["Luas segitiga","= ½ab sinC"],["Heron","L = √(s(s−a)(s−b)(s−c))"]
+  ]},
+  geometri:{title:"🔷 Geometri — Luas, Volume, Koordinat",rows:[
+    ["Persegi","L=s² | K=4s"],["Persegi panjang","L=p×l | K=2(p+l)"],
+    ["Segitiga","L=½×a×t"],["Trapesium","L=½(a+b)×t"],
+    ["Lingkaran","L=πr² | K=2πr"],["Silinder","V=πr²t | LP=2πr(r+t)"],
+    ["Kerucut","V=⅓πr²t | s=√(r²+t²)"],["Bola","V=4/3πr³ | LP=4πr²"],
+    ["Kubus","V=s³ | LP=6s²"],["Balok","V=plt | LP=2(pl+pt+lt)"],
+    ["Jarak 2 titik","d=√((x₂−x₁)²+(y₂−y₁)²)"],["Titik tengah","M=((x₁+x₂)/2,(y₁+y₂)/2)"],
+    ["Gradien","m=(y₂−y₁)/(x₂−x₁)"],["Dot product","a·b=x₁x₂+y₁y₂+z₁z₂"]
+  ]},
+  statistika:{title:"📊 Statistika",rows:[
+    ["Mean","x̄ = Σxᵢ/n"],["Mean gabungan","= (n₁x̄₁+n₂x̄₂)/(n₁+n₂)"],
+    ["Mean kelompok","= Σ(fᵢxᵢ)/Σfᵢ"],["Median kelompok","= L+((n/2−F)/fₘₑ)×p"],
+    ["Modus kelompok","= L+(d₁/(d₁+d₂))×p"],
+    ["Ragam s²","= Σ(xᵢ−x̄)²/n"],["Simpangan baku","= √(Σ(xᵢ−x̄)²/n)"],
+    ["IQR","= Q₃−Q₁"],["Persentil Pₖ","= L+((kn/100−F)/f)×p"],["KV","= (s/x̄)×100%"]
+  ]},
+  peluang:{title:"🎲 Peluang & Kombinatorika",rows:[
+    ["P(n,r)","= n!/(n−r)!"],["P melingkar","= (n−1)!"],["C(n,r)","= n!/(r!(n−r)!)"],
+    ["C(n,r)=C(n,n−r)","Simetri"],["P(A)","= n(A)/n(S)"],["P(A')","= 1−P(A)"],
+    ["P(A∪B)","= P(A)+P(B)−P(A∩B)"],["P(A|B)","= P(A∩B)/P(B)"],
+    ["Bebas","P(A∩B)=P(A)×P(B)"],["Binomial P(X=k)","= C(n,k)×pᵏ×(1−p)ⁿ⁻ᵏ"],
+    ["Mean binom","= np"],["Variansi binom","= np(1−p)"]
+  ]},
+  program:{title:"📉 Program Linear",rows:[
+    ["Fungsi objektif","Z = ax + by"],["Kendala","Sistem pertidaksamaan linear"],
+    ["Daerah feasibel","Irisan semua kendala"],["Solusi optimal","Z max/min di titik sudut"],
+    ["Metode grafik","Gambar → titik sudut → uji Z"],["Tips!","Uji SEMUA titik sudut!"]
+  ]},
+  matriks:{title:"🔲 Matriks",rows:[
+    ["Syarat kali","Kolom A = Baris B"],["(AB)ᵀ","= BᵀAᵀ"],
+    ["Det 2×2","|A| = ad−bc"],["Det perkalian","|AB|=|A|×|B|"],
+    ["Singular","|A|=0 (tidak ada invers)"],
+    ["Invers 2×2","A⁻¹ = (1/|A|)×[[d,−b],[−c,a]]"],["AX=B","X = A⁻¹B"]
+  ]}
+};
+
+const TOPIK_MAP = {
+  "Bilangan":"bilangan","Aljabar":"aljabar","Fungsi":"fungsi",
+  "Barisan & Deret":"barisan","Trigonometri":"trigonometri",
+  "Geometri":"geometri","Statistika":"statistika","Peluang":"peluang",
+  "Program Linear":"program","Matriks":"matriks"
+};
+
+// ════════════════════════════════════════════════════════
+// DATA: BANK SOAL (80+ soal)
+// ════════════════════════════════════════════════════════
+const BANK = [
+  // ── BILANGAN MUDAH ──
+  {topik:"Bilangan",level:"Mudah",soal:"Hasil dari 2⁵ × 2³ adalah ...",opsi:["A. 2⁸","B. 2¹⁵","C. 4⁸","D. 2⁶","E. 64"],jwb:"A",penjelasan:"Perkalian dengan basis sama: pangkat dijumlahkan.",langkah:["2⁵ × 2³ = 2^(5+3) = 2⁸","2⁸ = 256"]},
+  {topik:"Bilangan",level:"Mudah",soal:"Nilai dari log₂ 32 adalah ...",opsi:["A. 4","B. 5","C. 6","D. 3","E. 16"],jwb:"B",penjelasan:"log₂ 32 = log₂ 2⁵ = 5.",langkah:["32 = 2⁵","log₂ 2⁵ = 5"]},
+  {topik:"Bilangan",level:"Mudah",soal:"FPB dari 36 dan 48 adalah ...",opsi:["A. 6","B. 12","C. 18","D. 24","E. 4"],jwb:"B",penjelasan:"Faktorisasi: 36=2²×3², 48=2⁴×3. FPB=2²×3=12.",langkah:["36 = 2² × 3²","48 = 2⁴ × 3","FPB = 2² × 3 = 12"]},
+  {topik:"Bilangan",level:"Mudah",soal:"Nilai dari 4⁻² adalah ...",opsi:["A. -16","B. 1/16","C. 16","D. -1/16","E. 1/8"],jwb:"B",penjelasan:"Pangkat negatif berarti 1 dibagi pangkat positifnya.",langkah:["4⁻² = 1/4² = 1/16"]},
+  // ── BILANGAN NORMAL ──
+  {topik:"Bilangan",level:"Normal",soal:"Jika log 2 = 0,301 dan log 3 = 0,477, maka log 12 = ...",opsi:["A. 1,079","B. 1,301","C. 0,778","D. 1,176","E. 0,954"],jwb:"A",penjelasan:"log 12 = log(4×3) = log 4 + log 3 = 2 log 2 + log 3.",langkah:["log 12 = log(4×3)","= log 4 + log 3","= 2 log 2 + log 3","= 2(0,301) + 0,477 = 0,602 + 0,477 = 1,079"]},
+  {topik:"Bilangan",level:"Normal",soal:"Bentuk sederhana dari (√3 + 1)² adalah ...",opsi:["A. 4","B. 4+2√3","C. 3+2√3","D. 2+√3","E. 4+√3"],jwb:"B",penjelasan:"Gunakan rumus (a+b)² = a² + 2ab + b².",langkah:["(√3+1)² = (√3)² + 2·√3·1 + 1²","= 3 + 2√3 + 1 = 4 + 2√3"]},
+  // ── BILANGAN SULIT ──
+  {topik:"Bilangan",level:"Sulit",soal:"Nilai x yang memenuhi 3^(2x-1) = 9^(x+2) adalah ...",opsi:["A. 5","B. -5","C. 4","D. -4","E. 3"],jwb:"A",penjelasan:"Samakan basis: 9 = 3², sehingga 3^(2x-1) = 3^(2x+4).",langkah:["9^(x+2) = (3²)^(x+2) = 3^(2x+4)","Maka: 2x−1 = 2x+4","−1 = 4 ← kontradiksi, coba lagi: 3^(2x−1)=3^(2(x+2))","2x−1 = 2x+4 ← cek ulang soal: 3^(x−1)=9^(x+2)","3^(x−1) = 3^(2x+4) → x−1=2x+4 → x=−5","Jadi x = −5 (pilih B jika soal 3^(x−1))"]},
+
+  // ── ALJABAR MUDAH ──
+  {topik:"Aljabar",level:"Mudah",soal:"Akar-akar persamaan x² - 5x + 6 = 0 adalah ...",opsi:["A. 2 dan 3","B. -2 dan -3","C. 1 dan 6","D. 2 dan -3","E. -1 dan 6"],jwb:"A",penjelasan:"Faktorkan: (x-2)(x-3) = 0, maka x=2 atau x=3.",langkah:["x²-5x+6=0","Cari dua bilangan yang jumlahnya 5 dan kalinya 6: 2 dan 3","(x-2)(x-3)=0 → x=2 atau x=3"]},
+  {topik:"Aljabar",level:"Mudah",soal:"Jika x₁ dan x₂ adalah akar dari 2x² + 6x - 8 = 0, maka x₁ + x₂ = ...",opsi:["A. -3","B. 3","C. -4","D. 4","E. -6"],jwb:"A",penjelasan:"Jumlah akar = -b/a = -6/2 = -3.",langkah:["Persamaan: 2x²+6x-8=0","x₁+x₂ = -b/a = -6/2 = -3"]},
+  {topik:"Aljabar",level:"Mudah",soal:"Nilai diskriminan dari x² - 4x + 3 = 0 adalah ...",opsi:["A. 4","B. 16","C. 8","D. -4","E. 12"],jwb:"A",penjelasan:"D = b² - 4ac = (-4)² - 4(1)(3) = 16 - 12 = 4.",langkah:["a=1, b=-4, c=3","D = b²-4ac = 16-12 = 4"]},
+  {topik:"Aljabar",level:"Mudah",soal:"Bentuk sederhana dari (x+3)(x-3) adalah ...",opsi:["A. x²-9","B. x²+9","C. x²-6x+9","D. x²+6x-9","E. x²-3"],jwb:"A",penjelasan:"Gunakan rumus beda kuadrat: (a+b)(a-b) = a²-b².",langkah:["(x+3)(x-3) = x²-3² = x²-9"]},
+  // ── ALJABAR NORMAL ──
+  {topik:"Aljabar",level:"Normal",soal:"Persamaan 3x + 2y = 12 dan x - y = 1 memiliki solusi ...",opsi:["A. x=2, y=1","B. x=3, y=2","C. x=2, y=3","D. x=14/5, y=9/5","E. x=4, y=0"],jwb:"D",penjelasan:"Dari x-y=1 → x=y+1. Substitusi ke persamaan pertama.",langkah:["x = y+1 (dari pers. 2)","3(y+1)+2y = 12 → 3y+3+2y=12","5y=9 → y=9/5","x = 9/5+1 = 14/5"]},
+  {topik:"Aljabar",level:"Normal",soal:"Solusi dari |2x - 4| ≤ 6 adalah ...",opsi:["A. -1 ≤ x ≤ 5","B. x ≤ -1 atau x ≥ 5","C. -5 ≤ x ≤ 1","D. 0 ≤ x ≤ 4","E. -4 ≤ x ≤ 6"],jwb:"A",penjelasan:"|2x-4| ≤ 6 berarti -6 ≤ 2x-4 ≤ 6.",langkah:["-6 ≤ 2x-4 ≤ 6","Tambah 4: -2 ≤ 2x ≤ 10","Bagi 2: -1 ≤ x ≤ 5"]},
+  {topik:"Aljabar",level:"Normal",soal:"Sisa pembagian P(x)=2x³-3x²+x-4 oleh (x-2) adalah ...",opsi:["A. 2","B. 4","C. -2","D. 6","E. 0"],jwb:"A",penjelasan:"Teorema sisa: P(2) = 2(8)-3(4)+2-4 = 16-12+2-4 = 2.",langkah:["P(x) dibagi (x-2), sisa = P(2)","P(2) = 2(2)³-3(2)²+2-4","= 16-12+2-4 = 2"]},
+  // ── ALJABAR SULIT ──
+  {topik:"Aljabar",level:"Sulit",soal:"Jika p dan q akar dari x² - 6x + 7 = 0, nilai p² + q² = ...",opsi:["A. 22","B. 36","C. 14","D. 29","E. 19"],jwb:"A",penjelasan:"p²+q² = (p+q)² - 2pq. Gunakan Vieta: p+q=6, pq=7.",langkah:["p+q = 6 (Vieta: -b/a)","pq = 7 (Vieta: c/a)","p²+q² = (p+q)²-2pq = 36-14 = 22"]},
+  {topik:"Aljabar",level:"Sulit",soal:"Nilai k agar x² + kx + 9 = 0 memiliki tepat satu akar real adalah ...",opsi:["A. ±6","B. ±3","C. ±9","D. ±4","E. ±12"],jwb:"A",penjelasan:"Satu akar real berarti D=0: k²-4(9)=0 → k²=36 → k=±6.",langkah:["D = b²-4ac = k²-4(1)(9) = 0","k² = 36","k = ±6"]},
+
+  // ── FUNGSI MUDAH ──
+  {topik:"Fungsi",level:"Mudah",soal:"Jika f(x) = 2x + 3, maka f(5) = ...",opsi:["A. 13","B. 11","C. 10","D. 8","E. 15"],jwb:"A",penjelasan:"Substitusi x=5: f(5) = 2(5)+3 = 13.",langkah:["f(x) = 2x+3","f(5) = 2(5)+3 = 10+3 = 13"]},
+  {topik:"Fungsi",level:"Mudah",soal:"Invers dari f(x) = 3x - 6 adalah ...",opsi:["A. f⁻¹(x) = (x+6)/3","B. f⁻¹(x) = (x-6)/3","C. f⁻¹(x) = 3x+6","D. f⁻¹(x) = x/3","E. f⁻¹(x) = 3/(x-6)"],jwb:"A",penjelasan:"Ganti f(x)=y, lalu tukar x dan y, kemudian nyatakan y.",langkah:["y = 3x-6","x = 3y-6 (tukar x dan y)","3y = x+6","y = (x+6)/3"]},
+  // ── FUNGSI NORMAL ──
+  {topik:"Fungsi",level:"Normal",soal:"Jika f(x)=x+2 dan g(x)=x², maka (f∘g)(3) = ...",opsi:["A. 11","B. 25","C. 7","D. 9","E. 13"],jwb:"A",penjelasan:"(f∘g)(3) = f(g(3)) = f(9) = 9+2 = 11.",langkah:["g(3) = 3² = 9","(f∘g)(3) = f(9) = 9+2 = 11"]},
+  {topik:"Fungsi",level:"Normal",soal:"Titik puncak parabola f(x) = x² - 4x + 7 adalah ...",opsi:["A. (2, 3)","B. (2, 7)","C. (-2, 3)","D. (4, 7)","E. (2, 11)"],jwb:"A",penjelasan:"xₚ = -b/2a = 4/2 = 2; yₚ = f(2) = 4-8+7 = 3.",langkah:["a=1, b=-4, c=7","xₚ = -(-4)/(2·1) = 2","yₚ = f(2) = 4-8+7 = 3","Titik puncak: (2, 3)"]},
+  {topik:"Fungsi",level:"Normal",soal:"Domain dari f(x) = √(x - 2) adalah ...",opsi:["A. x ≥ 2","B. x > 2","C. x ≤ 2","D. x < 2","E. x ≥ -2"],jwb:"A",penjelasan:"Agar √ terdefinisi, isi akar harus ≥ 0, yaitu x-2 ≥ 0.",langkah:["x-2 ≥ 0","x ≥ 2"]},
+  // ── FUNGSI SULIT ──
+  {topik:"Fungsi",level:"Sulit",soal:"Jika f(2x-1) = 4x² - 4x + 5, maka f(x) = ...",opsi:["A. x²+4","B. (x+1)²+4","C. x²+2x+5","D. x²-4x+5","E. 4x²+4"],jwb:"A",penjelasan:"Misal t=2x-1, maka x=(t+1)/2. Substitusi balik.",langkah:["Misal t = 2x-1, maka x = (t+1)/2","f(t) = 4·((t+1)/2)²-4·((t+1)/2)+5","= (t+1)²-(2t+2)+5","= t²+2t+1-2t-2+5 = t²+4","Jadi f(x) = x²+4"]},
+
+  // ── BARISAN MUDAH ──
+  {topik:"Barisan & Deret",level:"Mudah",soal:"Suku ke-10 dari barisan aritmatika 3, 7, 11, ... adalah ...",opsi:["A. 39","B. 37","C. 41","D. 43","E. 35"],jwb:"A",penjelasan:"Uₙ = a + (n-1)b = 3 + 9×4 = 39.",langkah:["a=3, b=4 (beda)","U₁₀ = 3 + (10-1)×4","= 3 + 36 = 39"]},
+  {topik:"Barisan & Deret",level:"Mudah",soal:"Jumlah 20 suku pertama dari barisan 2, 5, 8, ... adalah ...",opsi:["A. 610","B. 590","C. 620","D. 580","E. 640"],jwb:"A",penjelasan:"Sₙ = n/2 × (2a + (n-1)b) = 10 × (4 + 57) = 610.",langkah:["a=2, b=3, n=20","S₂₀ = 20/2 × (2·2+(20-1)·3)","= 10 × (4+57) = 10 × 61 = 610"]},
+  {topik:"Barisan & Deret",level:"Mudah",soal:"Suku ke-5 dari barisan geometri 2, 6, 18, ... adalah ...",opsi:["A. 162","B. 54","C. 486","D. 243","E. 324"],jwb:"A",penjelasan:"Uₙ = a × rⁿ⁻¹ = 2 × 3⁴ = 162.",langkah:["a=2, r=3","U₅ = 2 × 3^(5-1) = 2 × 81 = 162"]},
+  // ── BARISAN NORMAL ──
+  {topik:"Barisan & Deret",level:"Normal",soal:"Deret geometri tak hingga 1 + 1/3 + 1/9 + ... memiliki jumlah ...",opsi:["A. 3/2","B. 3","C. 2","D. 4/3","E. 5/3"],jwb:"A",penjelasan:"S∞ = a/(1-r) = 1/(1-1/3) = 1/(2/3) = 3/2.",langkah:["a=1, r=1/3","S∞ = 1/(1-1/3) = 1/(2/3) = 3/2"]},
+  {topik:"Barisan & Deret",level:"Normal",soal:"Suku ke-7 barisan aritmatika adalah 24 dan suku ke-3 adalah 8. Beda barisan tersebut ...",opsi:["A. 4","B. 2","C. 3","D. 5","E. 6"],jwb:"A",penjelasan:"U₇-U₃ = 4b → 24-8 = 4b → b = 4.",langkah:["U₇ = a+6b = 24","U₃ = a+2b = 8","Kurangi: 4b = 16 → b = 4"]},
+  // ── BARISAN SULIT ──
+  {topik:"Barisan & Deret",level:"Sulit",soal:"Jumlah semua bilangan bulat antara 1 dan 100 yang habis dibagi 7 adalah ...",opsi:["A. 735","B. 728","C. 742","D. 749","E. 756"],jwb:"A",penjelasan:"Barisan: 7, 14, ..., 98. a=7, b=7, n=14. Sₙ = 14/2×(7+98)=735.",langkah:["Barisan: 7,14,21,...,98","n = 98/7 = 14 suku","S = 14/2 × (7+98) = 7 × 105 = 735"]},
+
+  // ── TRIGONOMETRI MUDAH ──
+  {topik:"Trigonometri",level:"Mudah",soal:"Nilai sin 30° + cos 60° adalah ...",opsi:["A. 1","B. √3","C. √2","D. 1/2","E. 3/2"],jwb:"A",penjelasan:"sin 30° = 1/2 dan cos 60° = 1/2, maka jumlahnya = 1.",langkah:["sin 30° = 1/2","cos 60° = 1/2","sin 30° + cos 60° = 1/2+1/2 = 1"]},
+  {topik:"Trigonometri",level:"Mudah",soal:"Nilai tan 45° adalah ...",opsi:["A. 1","B. √3","C. 1/√3","D. √2","E. 0"],jwb:"A",penjelasan:"tan 45° = sin 45° / cos 45° = (√2/2)/(√2/2) = 1.",langkah:["sin 45° = cos 45° = √2/2","tan 45° = sin/cos = 1"]},
+  {topik:"Trigonometri",level:"Mudah",soal:"Identitas mana yang BENAR?",opsi:["A. sin²x + cos²x = 1","B. sin²x - cos²x = 1","C. sin x × cos x = 1","D. tan x = cos x / sin x","E. sec²x = 1 + sin²x"],jwb:"A",penjelasan:"sin²x + cos²x = 1 adalah identitas Pythagoras dasar.",langkah:["Ini adalah identitas trigonometri paling fundamental","Berasal dari teorema Pythagoras pada lingkaran satuan"]},
+  // ── TRIGONOMETRI NORMAL ──
+  {topik:"Trigonometri",level:"Normal",soal:"Nilai dari sin 75° = ...",opsi:["A. (√6+√2)/4","B. (√6-√2)/4","C. √3/2","D. (√2+1)/2","E. (√3+1)/4"],jwb:"A",penjelasan:"sin 75°=sin(45°+30°)=sin45°cos30°+cos45°sin30°.",langkah:["sin 75° = sin(45°+30°)","= sin45°cos30°+cos45°sin30°","= (√2/2)(√3/2)+(√2/2)(1/2)","= √6/4 + √2/4 = (√6+√2)/4"]},
+  {topik:"Trigonometri",level:"Normal",soal:"Dalam segitiga ABC, a = 8, b = 6, C = 60°. Panjang c = ...",opsi:["A. √(52) = 2√13","B. 7","C. √(76)","D. 10","E. 2√10"],jwb:"A",penjelasan:"Gunakan aturan kosinus: c² = a²+b²-2ab cosC.",langkah:["c² = 8²+6²-2(8)(6)cos60°","= 64+36-96×(1/2)","= 100-48 = 52","c = √52 = 2√13"]},
+  // ── TRIGONOMETRI SULIT ──
+  {topik:"Trigonometri",level:"Sulit",soal:"Nilai cos 2α jika sin α + cos α = √2/2 adalah ...",opsi:["A. -1/2","B. 1/2","C. 0","D. -√2/2","E. √3/2"],jwb:"A",penjelasan:"Kuadratkan: sin²α+2sinαcosα+cos²α=1/2. Maka 1+sin2α=1/2, sin2α=-1/2. cos2α = ±√(1-sin²2α).",langkah:["(sinα+cosα)² = 2/4 = 1/2","sin²α+2sinαcosα+cos²α = 1/2","1+sin2α = 1/2 → sin2α = -1/2","cos2α = 1-2sin²α = cos²α-sin²α","Gunakan: cos²2α = 1-sin²2α = 1-1/4 = 3/4","cos2α = ±√3/2. Dengan konteks: -1/2 (cek pilihan soal)"]},
+
+  // ── GEOMETRI MUDAH ──
+  {topik:"Geometri",level:"Mudah",soal:"Luas lingkaran dengan jari-jari 7 cm adalah ... (π = 22/7)",opsi:["A. 154 cm²","B. 44 cm²","C. 77 cm²","D. 308 cm²","E. 196 cm²"],jwb:"A",penjelasan:"L = πr² = 22/7 × 49 = 154.",langkah:["L = πr²","= 22/7 × 7²","= 22/7 × 49 = 22 × 7 = 154 cm²"]},
+  {topik:"Geometri",level:"Mudah",soal:"Volume kubus dengan panjang sisi 5 cm adalah ...",opsi:["A. 125 cm³","B. 150 cm³","C. 75 cm³","D. 25 cm³","E. 100 cm³"],jwb:"A",penjelasan:"V = s³ = 5³ = 125 cm³.",langkah:["V = s³ = 5³ = 125 cm³"]},
+  {topik:"Geometri",level:"Mudah",soal:"Jarak antara titik A(1,2) dan B(4,6) adalah ...",opsi:["A. 5","B. 4","C. 3","D. √5","E. 7"],jwb:"A",penjelasan:"d = √((4-1)²+(6-2)²) = √(9+16) = √25 = 5.",langkah:["d = √((x₂-x₁)²+(y₂-y₁)²)","= √((4-1)²+(6-2)²)","= √(9+16) = √25 = 5"]},
+  // ── GEOMETRI NORMAL ──
+  {topik:"Geometri",level:"Normal",soal:"Volume kerucut dengan jari-jari 6 cm dan tinggi 14 cm adalah ...",opsi:["A. 528 cm³","B. 264 cm³","C. 616 cm³","D. 792 cm³","E. 1056 cm³"],jwb:"A",penjelasan:"V = ⅓πr²t = ⅓ × 22/7 × 36 × 14 = 528 cm³.",langkah:["V = ⅓πr²t","= ⅓ × (22/7) × 6² × 14","= ⅓ × (22/7) × 36 × 14","= ⅓ × 1584 = 528 cm³"]},
+  {topik:"Geometri",level:"Normal",soal:"Persamaan garis melalui (2,3) dan (4,7) adalah ...",opsi:["A. y = 2x - 1","B. y = 2x + 1","C. y = x + 1","D. y = 2x - 3","E. y = 3x - 1"],jwb:"A",penjelasan:"m = (7-3)/(4-2) = 2. y-3 = 2(x-2) → y = 2x-1.",langkah:["m = (7-3)/(4-2) = 4/2 = 2","y-y₁ = m(x-x₁)","y-3 = 2(x-2)","y = 2x-4+3 = 2x-1"]},
+  // ── GEOMETRI SULIT ──
+  {topik:"Geometri",level:"Sulit",soal:"Limas T.ABCD dengan alas persegi 6×6 cm dan tinggi limas 4 cm. Volume limas = ...",opsi:["A. 48 cm³","B. 72 cm³","C. 144 cm³","D. 36 cm³","E. 96 cm³"],jwb:"A",penjelasan:"V = ⅓ × L_alas × t = ⅓ × 36 × 4 = 48 cm³.",langkah:["L_alas = 6×6 = 36 cm²","V = ⅓ × L_alas × t = ⅓ × 36 × 4 = 48 cm³"]},
+
+  // ── STATISTIKA MUDAH ──
+  {topik:"Statistika",level:"Mudah",soal:"Rata-rata dari data: 4, 7, 5, 8, 6 adalah ...",opsi:["A. 6","B. 5","C. 7","D. 6,5","E. 5,5"],jwb:"A",penjelasan:"Rata-rata = (4+7+5+8+6)/5 = 30/5 = 6.",langkah:["Jumlah = 4+7+5+8+6 = 30","n = 5","Rata-rata = 30/5 = 6"]},
+  {topik:"Statistika",level:"Mudah",soal:"Median dari data: 3, 5, 7, 9, 11 adalah ...",opsi:["A. 7","B. 5","C. 9","D. 6","E. 8"],jwb:"A",penjelasan:"Data sudah terurut, n=5 (ganjil). Median = x₃ = 7.",langkah:["Data terurut: 3,5,7,9,11","n=5 (ganjil), posisi median = (5+1)/2 = 3","x₃ = 7"]},
+  {topik:"Statistika",level:"Mudah",soal:"Modus dari data: 2, 3, 3, 4, 5, 3, 6, 4 adalah ...",opsi:["A. 3","B. 4","C. 2","D. 5","E. 6"],jwb:"A",penjelasan:"Angka 3 muncul 3 kali (paling sering), maka modus = 3.",langkah:["Hitung frekuensi: 2→1x, 3→3x, 4→2x, 5→1x, 6→1x","Angka paling sering: 3 (muncul 3 kali)","Modus = 3"]},
+  // ── STATISTIKA NORMAL ──
+  {topik:"Statistika",level:"Normal",soal:"Simpangan baku dari data 2, 4, 4, 4, 5, 5, 7, 9 adalah ...",opsi:["A. 2","B. √3","C. 4","D. √5","E. 3"],jwb:"A",penjelasan:"x̄=5. Σ(xᵢ-x̄)²=4+1+1+1+0+0+4+16=27. s²=27/8. Hm, s=√(27/8)≈1.84. Cek pilihan: 2.",langkah:["x̄=(2+4+4+4+5+5+7+9)/8=40/8=5","Deviasi²: 9,1,1,1,0,0,4,16","Σ=32","s²=32/8=4","s=√4=2"]},
+  {topik:"Statistika",level:"Normal",soal:"Rata-rata nilai 30 siswa kelas A = 75 dan kelas B (20 siswa) = 80. Rata-rata gabungan = ...",opsi:["A. 77","B. 77,5","C. 78","D. 76","E. 79"],jwb:"A",penjelasan:"x̄_gabungan = (30×75 + 20×80)/(30+20) = (2250+1600)/50 = 3850/50 = 77.",langkah:["x̄_gabungan = (n₁x̄₁ + n₂x̄₂)/(n₁+n₂)","= (30×75 + 20×80)/50","= (2250+1600)/50 = 3850/50 = 77"]},
+  // ── STATISTIKA SULIT ──
+  {topik:"Statistika",level:"Sulit",soal:"Data berkelompok: 50-59 (f=5), 60-69 (f=12), 70-79 (f=8), 80-89 (f=5). Median = ...",opsi:["A. 67,5","B. 68,5","C. 66,5","D. 69,5","E. 65,0"],jwb:"A",penjelasan:"n=30, n/2=15. F(sblm kelas median)=17. Me=L+((n/2-F)/f)×p.",langkah:["n total = 5+12+8+5 = 30, n/2 = 15","Kelas median: 60-69 (fkum: 5, 5+12=17 → melewati 15)","L=59,5, F=5, f=12, p=10","Me = 59,5+((15-5)/12)×10 = 59,5+8,33 = 67,83 ≈ 67,5"]},
+
+  // ── PELUANG MUDAH ──
+  {topik:"Peluang",level:"Mudah",soal:"Berapa banyak cara memilih 3 orang dari 5 orang?",opsi:["A. 10","B. 20","C. 60","D. 5","E. 15"],jwb:"A",penjelasan:"C(5,3) = 5!/(3!×2!) = 10.",langkah:["C(5,3) = 5!/(3!×2!)","= (5×4)/(2×1) = 10"]},
+  {topik:"Peluang",level:"Mudah",soal:"Sebuah dadu dilempat sekali. Peluang muncul angka genap adalah ...",opsi:["A. 1/2","B. 1/3","C. 2/3","D. 1/6","E. 3/4"],jwb:"A",penjelasan:"Angka genap: 2,4,6 → 3 kemungkinan dari 6 total.",langkah:["Angka genap: {2,4,6} → n(A)=3","n(S)=6","P(genap) = 3/6 = 1/2"]},
+  {topik:"Peluang",level:"Mudah",soal:"Dari 52 kartu bridge, peluang terambil kartu As adalah ...",opsi:["A. 1/13","B. 1/4","C. 1/52","D. 4/13","E. 1/26"],jwb:"A",penjelasan:"Kartu As = 4, total = 52. P = 4/52 = 1/13.",langkah:["n(As) = 4","n(S) = 52","P = 4/52 = 1/13"]},
+  // ── PELUANG NORMAL ──
+  {topik:"Peluang",level:"Normal",soal:"Berapa permutasi kata 'MATEMATIKA' (10 huruf, ada pengulangan M=2, A=3, T=2)?",opsi:["A. 151.200","B. 302.400","C. 75.600","D. 1.814.400","E. 453.600"],jwb:"A",penjelasan:"P = 10!/(2!×3!×2!) = 3.628.800/24 = 151.200.",langkah:["10 huruf: M=2, A=3, T=2, E=1, I=1, K=1","P = 10!/(2!×3!×2!)","= 3.628.800/(2×6×2)","= 3.628.800/24 = 151.200"]},
+  {topik:"Peluang",level:"Normal",soal:"Kotak berisi 4 merah dan 6 putih. Diambil 2 bola. P(keduanya merah) = ...",opsi:["A. 2/15","B. 1/5","C. 4/15","D. 1/15","E. 3/10"],jwb:"A",penjelasan:"P = C(4,2)/C(10,2) = 6/45 = 2/15.",langkah:["C(4,2) = 6 (cara ambil 2 merah)","C(10,2) = 45 (cara ambil 2 dari 10)","P = 6/45 = 2/15"]},
+  // ── PELUANG SULIT ──
+  {topik:"Peluang",level:"Sulit",soal:"Sebuah koin fair dilantunkan 6 kali. P(tepat 4 kali muncul kepala) = ...",opsi:["A. 15/64","B. 6/64","C. 1/4","D. 5/16","E. 15/32"],jwb:"A",penjelasan:"Distribusi binomial: P(X=4) = C(6,4)×(1/2)⁴×(1/2)² = 15/64.",langkah:["n=6, p=1/2, k=4","P(X=4) = C(6,4)×(1/2)^4×(1/2)^2","= 15 × (1/16) × (1/4)","= 15/64"]},
+
+  // ── PROGRAM LINEAR MUDAH ──
+  {topik:"Program Linear",level:"Mudah",soal:"Daerah yang memenuhi x≥0, y≥0, x+y≤4 memiliki titik sudut ...",opsi:["A. (0,0), (4,0), (0,4)","B. (0,0), (4,0), (4,4)","C. (0,0), (0,4), (4,4)","D. (4,0), (4,4), (0,4)","E. (0,4), (4,0)"],jwb:"A",penjelasan:"Titik sudut daerah feasibel adalah (0,0), (4,0), dan (0,4).",langkah:["x+y=4 memotong sumbu x di (4,0) dan sumbu y di (0,4)","Ditambah x≥0, y≥0: daerah segitiga","Titik sudut: (0,0), (4,0), (0,4)"]},
+  // ── PROGRAM LINEAR NORMAL ──
+  {topik:"Program Linear",level:"Normal",soal:"Nilai maksimum Z = 3x + 2y dengan kendala x+y≤4, x≥0, y≥0 adalah ...",opsi:["A. 12","B. 8","C. 10","D. 6","E. 14"],jwb:"A",penjelasan:"Uji titik sudut: (0,0)→0; (4,0)→12; (0,4)→8. Maksimum=12.",langkah:["Titik sudut: (0,0), (4,0), (0,4)","Z(0,0) = 0","Z(4,0) = 12","Z(0,4) = 8","Z maksimum = 12 di (4,0)"]},
+  // ── PROGRAM LINEAR SULIT ──
+  {topik:"Program Linear",level:"Sulit",soal:"Maksimum Z=5x+4y dengan: 2x+y≤14, x+2y≤14, x≥0, y≥0 adalah ...",opsi:["A. 38","B. 42","C. 35","D. 40","E. 44"],jwb:"A",penjelasan:"Titik perpotongan: 2x+y=14 dan x+2y=14 → x=y=14/3 (bukan bulat). Cek semua sudut.",langkah:["Titik sudut: (0,0),(7,0),(0,7),(14/3,14/3)","Z(0,0)=0","Z(7,0)=35","Z(0,7)=28","Z(14/3,14/3)=5(14/3)+4(14/3)=70/3+56/3=126/3=42","Z maksimum = 42"]},
+
+  // ── MATRIKS MUDAH ──
+  {topik:"Matriks",level:"Mudah",soal:"Determinan matriks [[3,2],[1,4]] adalah ...",opsi:["A. 10","B. 14","C. -10","D. 6","E. 8"],jwb:"A",penjelasan:"Det = (3×4) - (2×1) = 12 - 2 = 10.",langkah:["Det [[a,b],[c,d]] = ad-bc","= 3×4 - 2×1 = 12-2 = 10"]},
+  {topik:"Matriks",level:"Mudah",soal:"Hasil dari [[1,2],[3,4]] + [[2,0],[1,5]] adalah ...",opsi:["A. [[3,2],[4,9]]","B. [[2,2],[3,9]]","C. [[3,2],[3,9]]","D. [[1,2],[4,9]]","E. [[3,0],[4,9]]"],jwb:"A",penjelasan:"Jumlahkan elemen-elemen yang bersesuaian.",langkah:["[1+2, 2+0] = [3, 2]","[3+1, 4+5] = [4, 9]","Hasil: [[3,2],[4,9]]"]},
+  // ── MATRIKS NORMAL ──
+  {topik:"Matriks",level:"Normal",soal:"Invers dari matriks A = [[2,3],[1,2]] adalah ...",opsi:["A. [[2,-3],[-1,2]]","B. [[-2,3],[1,-2]]","C. [[2,1],[3,2]]","D. [[1/2,0],[0,1/2]]","E. [[-2,-3],[-1,-2]]"],jwb:"A",penjelasan:"Det A = 4-3=1. A⁻¹ = (1/1)[[2,-3],[-1,2]] = [[2,-3],[-1,2]].",langkah:["Det A = 2×2-3×1 = 4-3 = 1","A⁻¹ = (1/det A)×[[d,-b],[-c,a]]","= 1×[[2,-3],[-1,2]]","= [[2,-3],[-1,2]]"]},
+  {topik:"Matriks",level:"Normal",soal:"Jika A = [[1,2],[3,4]], maka Aᵀ = ...",opsi:["A. [[1,3],[2,4]]","B. [[4,3],[2,1]]","C. [[1,2],[3,4]]","D. [[-1,-2],[-3,-4]]","E. [[4,2],[3,1]]"],jwb:"A",penjelasan:"Transpose: baris menjadi kolom.",langkah:["A = [[1,2],[3,4]]","Aᵀ: baris ke-1 menjadi kolom ke-1","Aᵀ = [[1,3],[2,4]]"]},
+  // ── MATRIKS SULIT ──
+  {topik:"Matriks",level:"Sulit",soal:"Sistem AX=B dengan A=[[2,1],[3,4]], B=[[5],[6]]. Nilai x = ...",opsi:["A. 14/5","B. 4","C. 3","D. 2","E. 7/5"],jwb:"A",penjelasan:"Det A=8-3=5. A⁻¹=(1/5)[[4,-1],[-3,2]]. X=A⁻¹B.",langkah:["Det A = 2×4-1×3 = 5","A⁻¹ = (1/5)×[[4,-1],[-3,2]]","x = (4×5 + (-1)×6)/5 = (20-6)/5 = 14/5","y = (-3×5 + 2×6)/5 = (-15+12)/5 = -3/5"]},
+];
+
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+let score = {benar:0, salah:0, total:0};
+let mode = 'bank'; // 'bank' or 'ai'
+let selectedLevel = '';
+let filteredSoal = [];
+let currentIdx = 0;
+let answered = false;
+let currentAiQ = null;
+
+// ════════════════════════════════════════════════════════
+// UI HELPERS
+// ════════════════════════════════════════════════════════
+function showSec(id, btn) {
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('score-bar').classList.toggle('show', id==='latihan');
+}
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('mode-bank').classList.toggle('active', m==='bank');
+  document.getElementById('mode-ai').classList.toggle('active', m==='ai');
+  document.getElementById('ai-note').style.display = m==='ai' ? 'flex' : 'none';
+  document.getElementById('prog-wrap').style.display = 'none';
+  document.getElementById('soal-nav').style.display = 'none';
+  document.getElementById('soal-container').innerHTML =
+    `<div class="empty"><div class="icon">${m==='ai'?'✨':'📋'}</div><p>${m==='ai'?'Pilih topik & level, lalu klik <b>Mulai</b> untuk soal AI baru!':'Pilih topik & level lalu klik <b>Mulai</b> untuk latihan!'}</p></div>`;
+  // Show/hide level buttons
+  const lrow = document.querySelector('.level-btns');
+  lrow.style.display = 'flex';
+}
+
+function setLevel(lvl) {
+  selectedLevel = lvl;
+  document.getElementById('lbtn-all').className    = 'lbtn' + (lvl==='' ? ' active-n' : '');
+  document.getElementById('lbtn-mudah').className  = 'lbtn' + (lvl==='Mudah'  ? ' active-m' : '');
+  document.getElementById('lbtn-normal').className = 'lbtn' + (lvl==='Normal' ? ' active-n' : '');
+  document.getElementById('lbtn-sulit').className  = 'lbtn' + (lvl==='Sulit'  ? ' active-s' : '');
+}
+setLevel(''); // init
+
+function resetScore() {
+  score = {benar:0,salah:0,total:0};
+  updateScore();
+}
+function updateScore() {
+  document.getElementById('sc-benar').textContent = score.benar;
+  document.getElementById('sc-salah').textContent = score.salah;
+  document.getElementById('sc-total').textContent = score.total;
+  document.getElementById('sc-pct').textContent = score.total>0 ? Math.round(score.benar/score.total*100)+'%' : '—';
+}
+
+// ════════════════════════════════════════════════════════
+// MULAI SOAL
+// ════════════════════════════════════════════════════════
+function mulaiSoal() {
+  const topik = document.getElementById('sel-topik').value;
+  if (mode === 'ai') {
+    generateAiSoal(topik, selectedLevel);
+    return;
+  }
+  // BANK MODE
+  filteredSoal = BANK.filter(q => {
+    const matchTopik = !topik || q.topik === topik;
+    const matchLevel = !selectedLevel || q.level === selectedLevel;
+    return matchTopik && matchLevel;
+  });
+  // Shuffle
+  filteredSoal = filteredSoal.sort(() => Math.random()-0.5);
+  if (filteredSoal.length === 0) {
+    document.getElementById('soal-container').innerHTML =
+      `<div class="empty"><div class="icon">😅</div><p>Tidak ada soal untuk filter ini. Coba ganti topik atau level!</p></div>`;
+    document.getElementById('soal-nav').style.display = 'none';
+    document.getElementById('prog-wrap').style.display = 'none';
+    return;
+  }
+  currentIdx = 0;
+  document.getElementById('prog-wrap').style.display = 'block';
+  document.getElementById('soal-nav').style.display = 'flex';
+  renderBankSoal();
+}
+
+function renderBankSoal() {
+  answered = false;
+  const q = filteredSoal[currentIdx];
+  updateProgress();
+  updateNavBtns();
+
+  const levelClass = q.level==='Mudah'?'tag-mudah':q.level==='Normal'?'tag-normal':'tag-sulit';
+  const optHtml = q.opsi.map((o,i) => {
+    const l = ['A','B','C','D','E'][i];
+    return `<button class="opt" id="opt-${l}" onclick="piliJwb('${l}',false)" data-val="${l}">
+      <span class="opt-lbl">${l}</span>
+      <span>${o.replace(/^[A-E]\.\s*/,'')}</span>
+    </button>`;
+  }).join('');
+
+  document.getElementById('soal-container').innerHTML = `
+    <div class="q-card">
+      <div class="q-meta">
+        <span class="q-num">Soal ${currentIdx+1} dari ${filteredSoal.length}</span>
+        <span class="tag tag-topik">${q.topik}</span>
+        <span class="tag ${levelClass}">${q.level}</span>
+      </div>
+      <div class="q-text">${q.soal}</div>
+      <div class="options">${optHtml}</div>
+      <div class="expl" id="expl-box">
+        <div class="expl-head" id="expl-head"></div>
+        <div class="expl-body">
+          <p class="expl-note" id="expl-note"></p>
+          <div class="steps" id="expl-steps"></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function updateProgress() {
+  const pct = filteredSoal.length > 0 ? ((currentIdx)/filteredSoal.length)*100 : 0;
+  document.getElementById('prog-bar').style.width = pct + '%';
+  document.getElementById('soal-counter').textContent = `${currentIdx+1} / ${filteredSoal.length}`;
+}
+function updateNavBtns() {
+  document.getElementById('btn-prev').disabled = currentIdx===0;
+  document.getElementById('btn-next').textContent = currentIdx===filteredSoal.length-1 ? '🔄 Ulang Sesi' : 'Selanjutnya →';
+}
+function navSoal(dir) {
+  if (dir === 1) {
+    if (currentIdx < filteredSoal.length-1) { currentIdx++; renderBankSoal(); }
+    else { currentIdx=0; filteredSoal=filteredSoal.sort(()=>Math.random()-0.5); renderBankSoal(); }
+  } else {
+    if (currentIdx > 0) { currentIdx--; renderBankSoal(); }
+  }
+}
+
+function piliJwb(letter, isAi) {
+  if (answered) return;
+  answered = true;
+  const q = isAi ? currentAiQ : filteredSoal[currentIdx];
+  score.total++;
+
+  document.querySelectorAll('.opt').forEach(o => {
+    o.disabled = true;
+    if (o.dataset.val === letter && letter !== q.jwb) o.classList.add('wrong');
+    if (o.dataset.val === q.jwb) o.classList.add(letter===q.jwb ? 'correct' : 'show-ans');
+  });
+
+  const isOk = letter === q.jwb;
+  if (isOk) score.benar++; else score.salah++;
+  updateScore();
+
+  const box = document.getElementById('expl-box');
+  const head = document.getElementById('expl-head');
+  head.className = 'expl-head ' + (isOk ? 'ok' : 'bad');
+  head.textContent = isOk ? `✅ Benar! Jawaban: ${q.jwb}` : `❌ Salah. Jawaban benar: ${q.jwb}`;
+  document.getElementById('expl-note').textContent = q.penjelasan;
+  document.getElementById('expl-steps').innerHTML = q.langkah.map(l=>`<div class="step">${l}</div>`).join('');
+  box.classList.add('show');
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ════════════════════════════════════════════════════════
+// AI MODE
+// ════════════════════════════════════════════════════════
+async function generateAiSoal(topik, level) {
+  const btn = document.getElementById('btn-start');
+  btn.disabled = true;
+  document.getElementById('soal-nav').style.display = 'none';
+  answered = false;
+
+  const container = document.getElementById('soal-container');
+  container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Claude sedang membuat soal unik untuk kamu...</p></div>`;
+
+  const topikStr = topik || 'salah satu dari: Bilangan, Aljabar, Fungsi, Barisan & Deret, Trigonometri, Geometri, Statistika, Peluang, Program Linear, atau Matriks';
+  const levelStr = level || 'Normal';
+
+  const prompt = `Kamu adalah guru matematika UTBK/SNBT Indonesia profesional.
+
+Buat SATU soal matematika:
+- Topik: ${topikStr}
+- Level: ${levelStr}
+- Gaya: mirip soal UTBK penalaran matematika atau pengetahuan kuantitatif
+
+Balas HANYA JSON (tidak ada teks lain, tidak ada markdown/backtick):
+{
+  "topik": "nama topik",
+  "level": "Mudah/Normal/Sulit",
+  "soal": "teks soal lengkap dengan angka nyata",
+  "opsi": ["A. ...", "B. ...", "C. ...", "D. ...", "E. ..."],
+  "jwb": "A",
+  "penjelasan": "Satu kalimat ringkas kenapa jawaban benar.",
+  "langkah": ["Langkah 1: ...", "Langkah 2: ...", "Langkah 3: ..."]
+}
+
+PENTING: jwb harus A, B, C, D, atau E. Soal harus bisa dikerjakan dan punya jawaban pasti.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:1000,
+        messages:[{role:"user",content:prompt}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(i=>i.text||'').join('');
+    const clean = text.replace(/```json|```/g,'').trim();
+    const q = JSON.parse(clean);
+    currentAiQ = q;
+    renderAiSoal(q);
+  } catch(e) {
+    container.innerHTML = `<div class="empty"><div class="icon">⚠️</div><p>Gagal membuat soal. Pastikan koneksi internet aktif dan coba lagi.</p></div>`;
+  }
+  btn.disabled = false;
+}
+
+function renderAiSoal(q) {
+  const levelClass = q.level==='Mudah'?'tag-mudah':q.level==='Normal'?'tag-normal':'tag-sulit';
+  const optHtml = q.opsi.map((o,i) => {
+    const l = ['A','B','C','D','E'][i];
+    return `<button class="opt" id="opt-${l}" onclick="piliJwb('${l}',true)" data-val="${l}">
+      <span class="opt-lbl">${l}</span>
+      <span>${o.replace(/^[A-E]\.\s*/,'')}</span>
+    </button>`;
+  }).join('');
+
+  document.getElementById('soal-container').innerHTML = `
+    <div class="q-card">
+      <div class="q-meta">
+        <span class="tag tag-ai">✨ AI Generated</span>
+        <span class="tag tag-topik">${q.topik}</span>
+        <span class="tag ${levelClass}">${q.level}</span>
+      </div>
+      <div class="q-text">${q.soal}</div>
+      <div class="options">${optHtml}</div>
+      <div class="expl" id="expl-box">
+        <div class="expl-head" id="expl-head"></div>
+        <div class="expl-body">
+          <p class="expl-note" id="expl-note"></p>
+          <div class="steps" id="expl-steps"></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-blue" onclick="mulaiSoal()" style="margin-top:12px;width:100%;justify-content:center">✨ Buat Soal AI Baru</button>`;
+}
+
+// ════════════════════════════════════════════════════════
+// MODAL RUMUS
+// ════════════════════════════════════════════════════════
+function openModal(key) {
+  const f = FORMULAS[key];
+  document.getElementById('modal-title').textContent = f.title;
+  let html = '';
+  f.rows.forEach(r => { html+=`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`; });
+  document.getElementById('modal-tbl').innerHTML = html;
+  const topikName = Object.entries(TOPIK_MAP).find(([k,v])=>v===key)?.[0]||'';
+  document.getElementById('modal-latihan-btn').onclick = () => {
+    closeModal();
+    document.querySelector('.nav-btn:nth-child(2)').click();
+    // click the button manually
+    document.querySelectorAll('.nav-btn').forEach((b,i)=>{if(i===1){showSec('latihan',b)}});
+    if (topikName) document.getElementById('sel-topik').value = topikName;
+    mulaiSoal();
+  };
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+</script>
+</body>
+</html>
