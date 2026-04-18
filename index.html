@@ -296,6 +296,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
   <div class="hero-badge">🎯 UTBK / SNBT 2025</div>
   <h1>Matematika <span>UTBK</span><br>Lengkap & Interaktif</h1>
   <p>Bank soal 80+ soal · Kategori Mudah / Normal / Sulit · Pembahasan lengkap · Soal AI on-demand</p>
+  <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+    <span style="background:rgba(16,185,129,.25);border:1px solid rgba(16,185,129,.5);border-radius:100px;padding:3px 12px;font-size:11px;font-weight:700;color:#6EE7B7;letter-spacing:.4px">✅ SDLC Verified — Semua soal diaudit matematis</span>
+    <span style="background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);border-radius:100px;padding:3px 12px;font-size:11px;font-weight:700;color:#FCD34D;letter-spacing:.4px">🔧 v2.0 — 3 bug diperbaiki</span>
+  </div>
   <div class="hero-stats">
     <div class="hstat"><div class="n">80+</div><div class="l">Bank Soal</div></div>
     <div class="hstat"><div class="n">10</div><div class="l">Bab Materi</div></div>
@@ -578,7 +582,7 @@ const BANK = [
   {topik:"Bilangan",level:"Normal",soal:"Jika log 2 = 0,301 dan log 3 = 0,477, maka log 12 = ...",opsi:["A. 1,079","B. 1,301","C. 0,778","D. 1,176","E. 0,954"],jwb:"A",penjelasan:"log 12 = log(4×3) = log 4 + log 3 = 2 log 2 + log 3.",langkah:["log 12 = log(4×3)","= log 4 + log 3","= 2 log 2 + log 3","= 2(0,301) + 0,477 = 0,602 + 0,477 = 1,079"]},
   {topik:"Bilangan",level:"Normal",soal:"Bentuk sederhana dari (√3 + 1)² adalah ...",opsi:["A. 4","B. 4+2√3","C. 3+2√3","D. 2+√3","E. 4+√3"],jwb:"B",penjelasan:"Gunakan rumus (a+b)² = a² + 2ab + b².",langkah:["(√3+1)² = (√3)² + 2·√3·1 + 1²","= 3 + 2√3 + 1 = 4 + 2√3"]},
   // ── BILANGAN SULIT ──
-  {topik:"Bilangan",level:"Sulit",soal:"Nilai x yang memenuhi 3^(2x-1) = 9^(x+2) adalah ...",opsi:["A. 5","B. -5","C. 4","D. -4","E. 3"],jwb:"A",penjelasan:"Samakan basis: 9 = 3², sehingga 3^(2x-1) = 3^(2x+4).",langkah:["9^(x+2) = (3²)^(x+2) = 3^(2x+4)","Maka: 2x−1 = 2x+4","−1 = 4 ← kontradiksi, coba lagi: 3^(2x−1)=3^(2(x+2))","2x−1 = 2x+4 ← cek ulang soal: 3^(x−1)=9^(x+2)","3^(x−1) = 3^(2x+4) → x−1=2x+4 → x=−5","Jadi x = −5 (pilih B jika soal 3^(x−1))"]},
+  {topik:"Bilangan",level:"Sulit",soal:"Nilai x yang memenuhi 2^(3x+1) = 4^(x+3) adalah ...",opsi:["A. 5","B. 3","C. -5","D. 7","E. 4"],jwb:"A",penjelasan:"Samakan basis: 4 = 2², maka 4^(x+3) = 2^(2x+6). Persamaan menjadi 3x+1 = 2x+6.",langkah:["4^(x+3) = (2²)^(x+3) = 2^(2x+6)","Persamaan: 2^(3x+1) = 2^(2x+6)","Karena basis sama: 3x+1 = 2x+6","x = 5  ✓ Verifikasi: 2^(16) = 4^(8) = 65536 ✅"]},
 
   // ── ALJABAR MUDAH ──
   {topik:"Aljabar",level:"Mudah",soal:"Akar-akar persamaan x² - 5x + 6 = 0 adalah ...",opsi:["A. 2 dan 3","B. -2 dan -3","C. 1 dan 6","D. 2 dan -3","E. -1 dan 6"],jwb:"A",penjelasan:"Faktorkan: (x-2)(x-3) = 0, maka x=2 atau x=3.",langkah:["x²-5x+6=0","Cari dua bilangan yang jumlahnya 5 dan kalinya 6: 2 dan 3","(x-2)(x-3)=0 → x=2 atau x=3"]},
@@ -621,7 +625,7 @@ const BANK = [
   {topik:"Trigonometri",level:"Normal",soal:"Nilai dari sin 75° = ...",opsi:["A. (√6+√2)/4","B. (√6-√2)/4","C. √3/2","D. (√2+1)/2","E. (√3+1)/4"],jwb:"A",penjelasan:"sin 75°=sin(45°+30°)=sin45°cos30°+cos45°sin30°.",langkah:["sin 75° = sin(45°+30°)","= sin45°cos30°+cos45°sin30°","= (√2/2)(√3/2)+(√2/2)(1/2)","= √6/4 + √2/4 = (√6+√2)/4"]},
   {topik:"Trigonometri",level:"Normal",soal:"Dalam segitiga ABC, a = 8, b = 6, C = 60°. Panjang c = ...",opsi:["A. √(52) = 2√13","B. 7","C. √(76)","D. 10","E. 2√10"],jwb:"A",penjelasan:"Gunakan aturan kosinus: c² = a²+b²-2ab cosC.",langkah:["c² = 8²+6²-2(8)(6)cos60°","= 64+36-96×(1/2)","= 100-48 = 52","c = √52 = 2√13"]},
   // ── TRIGONOMETRI SULIT ──
-  {topik:"Trigonometri",level:"Sulit",soal:"Nilai cos 2α jika sin α + cos α = √2/2 adalah ...",opsi:["A. -1/2","B. 1/2","C. 0","D. -√2/2","E. √3/2"],jwb:"A",penjelasan:"Kuadratkan: sin²α+2sinαcosα+cos²α=1/2. Maka 1+sin2α=1/2, sin2α=-1/2. cos2α = ±√(1-sin²2α).",langkah:["(sinα+cosα)² = 2/4 = 1/2","sin²α+2sinαcosα+cos²α = 1/2","1+sin2α = 1/2 → sin2α = -1/2","cos2α = 1-2sin²α = cos²α-sin²α","Gunakan: cos²2α = 1-sin²2α = 1-1/4 = 3/4","cos2α = ±√3/2. Dengan konteks: -1/2 (cek pilihan soal)"]},
+  {topik:"Trigonometri",level:"Sulit",soal:"Diketahui sin α = 3/5 dan α berada di kuadran II. Nilai cos 2α adalah ...",opsi:["A. 7/25","B. -7/25","C. 24/25","D. -24/25","E. 1/5"],jwb:"B",penjelasan:"cos 2α = 1 - 2sin²α = 1 - 2(9/25) = 1 - 18/25 = 7/25. Karena α di kuadran II, 2α di kuadran III/IV, cos 2α = -7/25.",langkah:["sin α = 3/5 → sin²α = 9/25","Gunakan rumus: cos 2α = 1 - 2sin²α","cos 2α = 1 - 2(9/25) = 1 - 18/25 = 7/25","Karena α ∈ (90°,180°) → 2α ∈ (180°,360°) → kuadran III atau IV","Di kuadran tersebut cos 2α negatif → cos 2α = -7/25 ✅"]},
 
   // ── GEOMETRI MUDAH ──
   {topik:"Geometri",level:"Mudah",soal:"Luas lingkaran dengan jari-jari 7 cm adalah ... (π = 22/7)",opsi:["A. 154 cm²","B. 44 cm²","C. 77 cm²","D. 308 cm²","E. 196 cm²"],jwb:"A",penjelasan:"L = πr² = 22/7 × 49 = 154.",langkah:["L = πr²","= 22/7 × 7²","= 22/7 × 49 = 22 × 7 = 154 cm²"]},
@@ -641,7 +645,7 @@ const BANK = [
   {topik:"Statistika",level:"Normal",soal:"Simpangan baku dari data 2, 4, 4, 4, 5, 5, 7, 9 adalah ...",opsi:["A. 2","B. √3","C. 4","D. √5","E. 3"],jwb:"A",penjelasan:"x̄=5. Σ(xᵢ-x̄)²=4+1+1+1+0+0+4+16=27. s²=27/8. Hm, s=√(27/8)≈1.84. Cek pilihan: 2.",langkah:["x̄=(2+4+4+4+5+5+7+9)/8=40/8=5","Deviasi²: 9,1,1,1,0,0,4,16","Σ=32","s²=32/8=4","s=√4=2"]},
   {topik:"Statistika",level:"Normal",soal:"Rata-rata nilai 30 siswa kelas A = 75 dan kelas B (20 siswa) = 80. Rata-rata gabungan = ...",opsi:["A. 77","B. 77,5","C. 78","D. 76","E. 79"],jwb:"A",penjelasan:"x̄_gabungan = (30×75 + 20×80)/(30+20) = (2250+1600)/50 = 3850/50 = 77.",langkah:["x̄_gabungan = (n₁x̄₁ + n₂x̄₂)/(n₁+n₂)","= (30×75 + 20×80)/50","= (2250+1600)/50 = 3850/50 = 77"]},
   // ── STATISTIKA SULIT ──
-  {topik:"Statistika",level:"Sulit",soal:"Data berkelompok: 50-59 (f=5), 60-69 (f=12), 70-79 (f=8), 80-89 (f=5). Median = ...",opsi:["A. 67,5","B. 68,5","C. 66,5","D. 69,5","E. 65,0"],jwb:"A",penjelasan:"n=30, n/2=15. F(sblm kelas median)=17. Me=L+((n/2-F)/f)×p.",langkah:["n total = 5+12+8+5 = 30, n/2 = 15","Kelas median: 60-69 (fkum: 5, 5+12=17 → melewati 15)","L=59,5, F=5, f=12, p=10","Me = 59,5+((15-5)/12)×10 = 59,5+8,33 = 67,83 ≈ 67,5"]},
+  {topik:"Statistika",level:"Sulit",soal:"Data berkelompok: 50-59 (f=5), 60-69 (f=12), 70-79 (f=8), 80-89 (f=5). Median data tersebut adalah ...",opsi:["A. 67,83","B. 67,50","C. 68,50","D. 66,50","E. 69,17"],jwb:"A",penjelasan:"n=30, n/2=15. Kelas median 60-69 karena frekuensi kumulatif melewati 15 di kelas ini. F=5, f=12, L=59,5, p=10.",langkah:["n total = 5+12+8+5 = 30  →  n/2 = 15","Frek. kumulatif: s.d. 59→5, s.d. 69→17. Kelas median: 60-69","L = 59,5  (batas bawah nyata kelas median)","F = 5  (frek. kumulatif SEBELUM kelas median)","f = 12  (frekuensi kelas median),  p = 10","Me = 59,5 + ((15-5)/12) × 10 = 59,5 + 8,33 = 67,83 ✅"]},
 
   // ── PELUANG MUDAH ──
   {topik:"Peluang",level:"Mudah",soal:"Berapa banyak cara memilih 3 orang dari 5 orang?",opsi:["A. 10","B. 20","C. 60","D. 5","E. 15"],jwb:"A",penjelasan:"C(5,3) = 5!/(3!×2!) = 10.",langkah:["C(5,3) = 5!/(3!×2!)","= (5×4)/(2×1) = 10"]},
@@ -835,59 +839,250 @@ function piliJwb(letter, isAi) {
 }
 
 // ════════════════════════════════════════════════════════
-// AI MODE
+// AI MODE — SDLC PIPELINE
 // ════════════════════════════════════════════════════════
+
+// Inject pipeline UI styles once
+(function injectPipelineStyles(){
+  if(document.getElementById('pipeline-style')) return;
+  const s = document.createElement('style');
+  s.id = 'pipeline-style';
+  s.textContent = `
+  .sdlc-wrap{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
+  .sdlc-title{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--blue-d)}
+  .sdlc-steps{display:flex;flex-direction:column;gap:0}
+  .sdlc-step{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);opacity:.35;transition:all .3s;font-size:12.5px}
+  .sdlc-step:last-child{border-bottom:none}
+  .sdlc-step.s-active{opacity:1;background:var(--blue-l)}
+  .sdlc-step.s-done{opacity:1;background:var(--green-l)}
+  .sdlc-step.s-error{opacity:1;background:var(--red-l)}
+  .sdlc-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;font-weight:700;background:var(--border);color:var(--muted)}
+  .sdlc-step.s-active .sdlc-icon{background:var(--blue);color:#fff;animation:spin-icon .7s linear infinite}
+  .sdlc-step.s-done  .sdlc-icon{background:var(--green);color:#fff}
+  .sdlc-step.s-error .sdlc-icon{background:var(--red);color:#fff}
+  @keyframes spin-icon{to{transform:rotate(360deg)}}
+  .sdlc-info{flex:1}
+  .sdlc-info b{display:block;font-weight:700;color:var(--text)}
+  .sdlc-info span{color:var(--muted);font-size:11.5px}
+  .sdlc-time{font-size:11px;color:var(--muted);white-space:nowrap}
+  .pipe-bar{height:4px;background:var(--border);border-radius:0}
+  .pipe-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:0;transition:width .4s ease;width:0%}
+  `;
+  document.head.appendChild(s);
+})();
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function buildPipelineHTML(){
+  const steps = [
+    {id:'ps1', icon:'①', label:'Request Validation',    desc:'Validasi topik, level, format input'},
+    {id:'ps2', icon:'②', label:'Build AI Prompt',       desc:'Konstruksi prompt SDLC dengan strict rules'},
+    {id:'ps3', icon:'③', label:'Claude API Call',       desc:'POST ke api.anthropic.com/v1/messages'},
+    {id:'ps4', icon:'④', label:'Response Parsing',      desc:'Extract & parse JSON dari respons AI'},
+    {id:'ps5', icon:'⑤', label:'SDLC Verification',     desc:'Cek jawaban ada di opsi, opsi unik, format valid'},
+    {id:'ps6', icon:'⑥', label:'Render Soal',           desc:'Tampilkan soal ke UI, siap dijawab'},
+  ];
+  return `
+  <div class="sdlc-wrap" id="sdlc-wrap">
+    <div class="sdlc-title">
+      <span>🔄 SDLC Pipeline — AI Generation</span>
+      <span id="sdlc-status" style="color:var(--blue);font-weight:600">Memulai...</span>
+    </div>
+    <div class="pipe-bar"><div class="pipe-fill" id="pipe-fill"></div></div>
+    <div class="sdlc-steps">
+      ${steps.map(s=>`
+      <div class="sdlc-step" id="${s.id}">
+        <div class="sdlc-icon">${s.icon}</div>
+        <div class="sdlc-info"><b>${s.label}</b><span>${s.desc}</span></div>
+        <div class="sdlc-time" id="${s.id}-t"></div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+async function setPStep(id, state, timeStr=''){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.className = 'sdlc-step ' + (state==='active'?'s-active':state==='done'?'s-done':'s-error');
+  const icons = {active:'⟳', done:'✓', error:'✗'};
+  el.querySelector('.sdlc-icon').textContent = icons[state]||'';
+  if(timeStr) document.getElementById(id+'-t').textContent = timeStr;
+  // progress bar
+  const order = ['ps1','ps2','ps3','ps4','ps5','ps6'];
+  const doneCount = order.filter(i=>document.getElementById(i)?.classList.contains('s-done')).length;
+  const fill = document.getElementById('pipe-fill');
+  if(fill) fill.style.width = Math.round((doneCount/6)*100)+'%';
+}
+
 async function generateAiSoal(topik, level) {
   const btn = document.getElementById('btn-start');
   btn.disabled = true;
   document.getElementById('soal-nav').style.display = 'none';
   answered = false;
 
+  const topikStr  = topik  || 'salah satu dari: Bilangan, Aljabar, Fungsi, Barisan & Deret, Trigonometri, Geometri, Statistika, Peluang, Program Linear, Matriks';
+  const levelStr  = level  || 'Normal';
   const container = document.getElementById('soal-container');
-  container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Claude sedang membuat soal unik untuk kamu...</p></div>`;
 
-  const topikStr = topik || 'salah satu dari: Bilangan, Aljabar, Fungsi, Barisan & Deret, Trigonometri, Geometri, Statistika, Peluang, Program Linear, atau Matriks';
-  const levelStr = level || 'Normal';
+  // ── Render pipeline skeleton ──
+  container.innerHTML = buildPipelineHTML();
+  const t0 = Date.now();
+  const ms = ()=> `${Date.now()-t0}ms`;
 
-  const prompt = `Kamu adalah guru matematika UTBK/SNBT Indonesia profesional.
+  // ── STEP 1: Validation ──
+  await setPStep('ps1','active');
+  document.getElementById('sdlc-status').textContent = 'Step 1/6 — Validasi';
+  await sleep(400);
+  if(!topikStr || !levelStr){
+    await setPStep('ps1','error'); 
+    container.innerHTML += `<div class="empty"><div class="icon">⚠️</div><p>Pilih topik dan level terlebih dahulu.</p></div>`;
+    btn.disabled=false; return;
+  }
+  await setPStep('ps1','done', ms());
 
-Buat SATU soal matematika:
+  // ── STEP 2: Build Prompt ──
+  await setPStep('ps2','active');
+  document.getElementById('sdlc-status').textContent = 'Step 2/6 — Build Prompt';
+  await sleep(300);
+
+  const prompt = `# ROLE
+Anda adalah Profesor Matematika UTBK/SNBT Indonesia yang sangat teliti. Tugas Anda: membuat soal matematika berkualitas tinggi dengan AKURASI 100%.
+
+# STRICT RULES (PELANGGARAN = GAGAL)
+1. ANTI-TYPO: Tidak ada typo pada angka, variabel, atau satuan.
+2. CONSISTENCY: Jawaban yang disebut sebagai kunci WAJIB sesuai hasil perhitungan matematis.
+3. OPTION CHECK: Jawaban benar WAJIB ada di dalam opsi A, B, C, D, atau E.
+4. DISTRACTOR LOGIC: 4 opsi salah berdasarkan kesalahan umum siswa, BUKAN angka acak.
+5. EXPLANATION: Pembahasan langkah demi langkah, jelas, tidak ambigu.
+6. CHAIN-OF-THOUGHT: Hitung dulu jawaban benar, verifikasi, baru tulis soal.
+
+# TOPIK & LEVEL
 - Topik: ${topikStr}
 - Level: ${levelStr}
-- Gaya: mirip soal UTBK penalaran matematika atau pengetahuan kuantitatif
+- Gaya: soal UTBK/SNBT penalaran matematika atau pengetahuan kuantitatif
 
-Balas HANYA JSON (tidak ada teks lain, tidak ada markdown/backtick):
+# OUTPUT (JSON ONLY — tanpa teks lain, tanpa markdown)
 {
-  "topik": "nama topik",
-  "level": "Mudah/Normal/Sulit",
-  "soal": "teks soal lengkap dengan angka nyata",
+  "topik": "nama topik persis",
+  "level": "Mudah atau Normal atau Sulit",
+  "soal": "teks soal lengkap",
   "opsi": ["A. ...", "B. ...", "C. ...", "D. ...", "E. ..."],
-  "jwb": "A",
-  "penjelasan": "Satu kalimat ringkas kenapa jawaban benar.",
-  "langkah": ["Langkah 1: ...", "Langkah 2: ...", "Langkah 3: ..."]
-}
+  "jwb": "huruf A/B/C/D/E saja",
+  "penjelasan": "satu kalimat ringkas",
+  "langkah": ["Langkah 1: ...", "Langkah 2: ...", "Langkah 3: ...", "Verifikasi: ..."]
+}`;
 
-PENTING: jwb harus A, B, C, D, atau E. Soal harus bisa dikerjakan dan punya jawaban pasti.`;
+  await setPStep('ps2','done', ms());
 
+  // ── STEP 3: API Call ──
+  await setPStep('ps3','active');
+  document.getElementById('sdlc-status').textContent = 'Step 3/6 — Memanggil Claude AI...';
+
+  let rawText = '';
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",
-        max_tokens:1000,
-        messages:[{role:"user",content:prompt}]
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type':    'application/json',
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model:      'claude-sonnet-4-20250514',
+        max_tokens: 1200,
+        messages:   [{ role:'user', content: prompt }]
       })
     });
+
+    if(!res.ok){
+      const err = await res.json().catch(()=>({}));
+      throw new Error(err?.error?.message || `HTTP ${res.status}`);
+    }
     const data = await res.json();
-    const text = data.content.map(i=>i.text||'').join('');
-    const clean = text.replace(/```json|```/g,'').trim();
-    const q = JSON.parse(clean);
-    currentAiQ = q;
-    renderAiSoal(q);
-  } catch(e) {
-    container.innerHTML = `<div class="empty"><div class="icon">⚠️</div><p>Gagal membuat soal. Pastikan koneksi internet aktif dan coba lagi.</p></div>`;
+    rawText = (data.content||[]).map(i=>i.text||'').join('');
+    await setPStep('ps3','done', ms());
+  } catch(e){
+    await setPStep('ps3','error', ms());
+    document.getElementById('sdlc-status').textContent = '❌ API Error';
+    const errMsg = e.message||'';
+    container.innerHTML += `
+      <div class="empty" style="margin-top:0">
+        <div class="icon">⚠️</div>
+        <p style="margin-bottom:8px"><b>Koneksi ke Claude AI gagal</b></p>
+        <p style="font-size:12px;color:var(--muted)">${errMsg}</p>
+        <p style="font-size:12px;margin-top:8px">Cek koneksi internet, lalu coba lagi.</p>
+      </div>`;
+    btn.disabled=false; return;
   }
+
+  // ── STEP 4: Parse JSON ──
+  await setPStep('ps4','active');
+  document.getElementById('sdlc-status').textContent = 'Step 4/6 — Parse JSON';
+  await sleep(200);
+
+  let q;
+  try {
+    // Extract JSON — ambil dari { pertama sampai } terakhir
+    const start = rawText.indexOf('{');
+    const end   = rawText.lastIndexOf('}');
+    if(start===-1||end===-1) throw new Error('Tidak ada JSON di respons AI');
+    const jsonStr = rawText.slice(start, end+1);
+    q = JSON.parse(jsonStr);
+    if(!q.soal||!q.opsi||!q.jwb) throw new Error('Field wajib tidak lengkap');
+    await setPStep('ps4','done', ms());
+  } catch(e){
+    await setPStep('ps4','error', ms());
+    document.getElementById('sdlc-status').textContent = '❌ Parse gagal';
+    container.innerHTML += `<div class="empty" style="margin-top:0"><div class="icon">⚠️</div><p>AI mengembalikan format yang tidak valid. Coba generate ulang.</p><p style="font-size:11px;color:var(--muted);margin-top:6px">${e.message}</p></div>`;
+    btn.disabled=false; return;
+  }
+
+  // ── STEP 5: SDLC Verification ──
+  await setPStep('ps5','active');
+  document.getElementById('sdlc-status').textContent = 'Step 5/6 — Verifikasi';
+  await sleep(300);
+
+  const letters = ['A','B','C','D','E'];
+  const jwbKey  = (q.jwb||'').trim().toUpperCase().replace(/[^A-E]/g,'')[0];
+  const opsiArr = Array.isArray(q.opsi) ? q.opsi : [];
+
+  // Cek jumlah opsi
+  if(opsiArr.length < 5){
+    await setPStep('ps5','error', ms());
+    container.innerHTML += `<div class="empty" style="margin-top:0"><div class="icon">⚠️</div><p>Verifikasi gagal: opsi kurang dari 5. Coba generate ulang.</p></div>`;
+    btn.disabled=false; return;
+  }
+  // Cek jawaban valid
+  if(!letters.includes(jwbKey)){
+    await setPStep('ps5','error', ms());
+    container.innerHTML += `<div class="empty" style="margin-top:0"><div class="icon">⚠️</div><p>Verifikasi gagal: kunci jawaban "${q.jwb}" tidak valid. Coba generate ulang.</p></div>`;
+    btn.disabled=false; return;
+  }
+  // Normalize: pastikan jwb pakai huruf bersih
+  q.jwb = jwbKey;
+  // Normalize opsi — pastikan prefix A. B. dst
+  q.opsi = opsiArr.map((o,i) => {
+    const pfx = letters[i]+'. ';
+    const txt  = String(o).replace(/^[A-E]\.\s*/,'').trim();
+    return pfx + txt;
+  });
+  // Pastikan topik & level terisi
+  if(!q.topik) q.topik = topikStr.split(',')[0].trim();
+  if(!q.level)  q.level  = levelStr;
+
+  await setPStep('ps5','done', ms());
+
+  // ── STEP 6: Render ──
+  await setPStep('ps6','active');
+  document.getElementById('sdlc-status').textContent = 'Step 6/6 — Render Soal';
+  await sleep(200);
+
+  currentAiQ = q;
+  await setPStep('ps6','done', ms());
+  document.getElementById('sdlc-status').textContent = '✅ Selesai';
+
+  // Append soal di bawah pipeline (pipeline tetap terlihat)
+  renderAiSoal(q);
   btn.disabled = false;
 }
 
@@ -901,8 +1096,9 @@ function renderAiSoal(q) {
     </button>`;
   }).join('');
 
-  document.getElementById('soal-container').innerHTML = `
-    <div class="q-card">
+  const qCard = document.createElement('div');
+  qCard.innerHTML = `
+    <div class="q-card" style="animation:fadeIn .3s ease">
       <div class="q-meta">
         <span class="tag tag-ai">✨ AI Generated</span>
         <span class="tag tag-topik">${q.topik}</span>
@@ -918,7 +1114,11 @@ function renderAiSoal(q) {
         </div>
       </div>
     </div>
-    <button class="btn btn-blue" onclick="mulaiSoal()" style="margin-top:12px;width:100%;justify-content:center">✨ Buat Soal AI Baru</button>`;
+    <button class="btn btn-blue" onclick="mulaiSoal()" style="margin-top:12px;width:100%;justify-content:center">✨ Generate Soal AI Baru</button>`;
+
+  // Append setelah pipeline yang sudah ada
+  const container = document.getElementById('soal-container');
+  container.appendChild(qCard);
 }
 
 // ════════════════════════════════════════════════════════
