@@ -399,7 +399,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
   <!-- Mode tabs -->
   <div class="mode-row">
     <button class="mode-btn active" id="mode-bank" onclick="setMode('bank')">📋 Bank Soal</button>
-    <button class="mode-btn" id="mode-ai" onclick="setMode('ai')">✨ AI Soal Baru</button>
+    <button class="mode-btn" id="mode-ai" onclick="setMode('ai')">🧠 Smart Generator</button>
   </div>
 
   <!-- Controls -->
@@ -428,7 +428,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 
   <!-- AI note (hidden by default) -->
   <div class="ai-note" id="ai-note" style="display:none">
-    ✨ Mode AI — Soal dibuat secara otomatis oleh Claude. Setiap klik menghasilkan soal unik yang belum pernah ada!
+    🧠 Mode Smart Generator — Soal dibuat secara otomatis dengan variasi angka & template baru. Bekerja <b>100% offline</b>, tidak perlu internet!
   </div>
 
   <!-- Progress (bank mode) -->
@@ -839,268 +839,398 @@ function piliJwb(letter, isAi) {
 }
 
 // ════════════════════════════════════════════════════════
-// AI MODE — SDLC PIPELINE
+// SMART GENERATOR — 100% OFFLINE, tidak butuh internet
+// Variasi angka & template otomatis per topik
 // ════════════════════════════════════════════════════════
 
-// Inject pipeline UI styles once
-(function injectPipelineStyles(){
-  if(document.getElementById('pipeline-style')) return;
-  const s = document.createElement('style');
-  s.id = 'pipeline-style';
-  s.textContent = `
-  .sdlc-wrap{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
-  .sdlc-title{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--blue-d)}
-  .sdlc-steps{display:flex;flex-direction:column;gap:0}
-  .sdlc-step{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);opacity:.35;transition:all .3s;font-size:12.5px}
-  .sdlc-step:last-child{border-bottom:none}
-  .sdlc-step.s-active{opacity:1;background:var(--blue-l)}
-  .sdlc-step.s-done{opacity:1;background:var(--green-l)}
-  .sdlc-step.s-error{opacity:1;background:var(--red-l)}
-  .sdlc-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;font-weight:700;background:var(--border);color:var(--muted)}
-  .sdlc-step.s-active .sdlc-icon{background:var(--blue);color:#fff;animation:spin-icon .7s linear infinite}
-  .sdlc-step.s-done  .sdlc-icon{background:var(--green);color:#fff}
-  .sdlc-step.s-error .sdlc-icon{background:var(--red);color:#fff}
-  @keyframes spin-icon{to{transform:rotate(360deg)}}
-  .sdlc-info{flex:1}
-  .sdlc-info b{display:block;font-weight:700;color:var(--text)}
-  .sdlc-info span{color:var(--muted);font-size:11.5px}
-  .sdlc-time{font-size:11px;color:var(--muted);white-space:nowrap}
-  .pipe-bar{height:4px;background:var(--border);border-radius:0}
-  .pipe-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:0;transition:width .4s ease;width:0%}
-  `;
-  document.head.appendChild(s);
-})();
-
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function rInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function shuffle(arr){return [...arr].sort(()=>Math.random()-.5);}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a;}
+function comb(n,r){if(r>n||r<0)return 0;let res=1;for(let i=0;i<r;i++)res=res*(n-i)/(i+1);return Math.round(res);}
+function perm(n,r){let res=1;for(let i=0;i<r;i++)res*=(n-i);return res;}
+function primeFactors(n){const f=[];let d=2;while(d*d<=n){while(n%d===0){f.push(d);n/=d;}d++;}if(n>1)f.push(n);return f.join('×');}
 
-function buildPipelineHTML(){
-  const steps = [
-    {id:'ps1', icon:'①', label:'Request Validation',    desc:'Validasi topik, level, format input'},
-    {id:'ps2', icon:'②', label:'Build AI Prompt',       desc:'Konstruksi prompt SDLC dengan strict rules'},
-    {id:'ps3', icon:'③', label:'Claude API Call',       desc:'POST ke api.anthropic.com/v1/messages'},
-    {id:'ps4', icon:'④', label:'Response Parsing',      desc:'Extract & parse JSON dari respons AI'},
-    {id:'ps5', icon:'⑤', label:'SDLC Verification',     desc:'Cek jawaban ada di opsi, opsi unik, format valid'},
-    {id:'ps6', icon:'⑥', label:'Render Soal',           desc:'Tampilkan soal ke UI, siap dijawab'},
-  ];
-  return `
-  <div class="sdlc-wrap" id="sdlc-wrap">
-    <div class="sdlc-title">
-      <span>🔄 SDLC Pipeline — AI Generation</span>
-      <span id="sdlc-status" style="color:var(--blue);font-weight:600">Memulai...</span>
-    </div>
-    <div class="pipe-bar"><div class="pipe-fill" id="pipe-fill"></div></div>
-    <div class="sdlc-steps">
-      ${steps.map(s=>`
-      <div class="sdlc-step" id="${s.id}">
-        <div class="sdlc-icon">${s.icon}</div>
-        <div class="sdlc-info"><b>${s.label}</b><span>${s.desc}</span></div>
-        <div class="sdlc-time" id="${s.id}-t"></div>
-      </div>`).join('')}
-    </div>
-  </div>`;
+// Buat 5 opsi: jawaban + 4 salah, posisi jawaban acak
+function buildOpts(ans, wrongs){
+  const L=['A','B','C','D','E'];
+  const pool=[...new Set(wrongs.filter(w=>String(w)!==String(ans)))].slice(0,4);
+  while(pool.length<4) pool.push(typeof ans==='number'?ans+pool.length+2:ans+'?');
+  const pos=rInt(0,4);
+  const vals=[...pool.map(String)]; vals.splice(pos,0,String(ans));
+  return { opsi:vals.slice(0,5).map((v,i)=>L[i]+'. '+v), jwb:L[pos] };
 }
 
-async function setPStep(id, state, timeStr=''){
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.className = 'sdlc-step ' + (state==='active'?'s-active':state==='done'?'s-done':'s-error');
-  const icons = {active:'⟳', done:'✓', error:'✗'};
-  el.querySelector('.sdlc-icon').textContent = icons[state]||'';
-  if(timeStr) document.getElementById(id+'-t').textContent = timeStr;
-  // progress bar
-  const order = ['ps1','ps2','ps3','ps4','ps5','ps6'];
-  const doneCount = order.filter(i=>document.getElementById(i)?.classList.contains('s-done')).length;
-  const fill = document.getElementById('pipe-fill');
-  if(fill) fill.style.width = Math.round((doneCount/6)*100)+'%';
-}
+// ── TEMPLATE BANK per topik ──
+const SMART_TEMPLATES = {
+'Bilangan':[
+  ()=>{
+    const b=pick([2,3,4,5]),e=rInt(2,5),ans=Math.pow(b,e);
+    const w=[ans+1,ans-1,ans*2,b*e].filter(x=>x!==ans&&x>0);
+    const o=buildOpts(ans,w);
+    return{soal:`Nilai dari ${b}^${e} adalah ...`,opsi:o.opsi,jwb:o.jwb,level:'Mudah',
+      penjelasan:`${b}^${e} = ${b} dipangkat ${e} = ${ans}`,
+      langkah:[`${b}^${e} = ${Array(e).fill(b).join(' × ')}`,`= ${ans}`]};
+  },
+  ()=>{
+    const b=pick([2,3,5,10]),e=rInt(2,4),val=Math.pow(b,e),ans=e;
+    const w=[e+1,e-1,e*2,b].filter(x=>x!==ans&&x>0);
+    const o=buildOpts(ans,w);
+    return{soal:`Nilai dari log_${b}(${val}) adalah ...`,opsi:o.opsi,jwb:o.jwb,level:'Normal',
+      penjelasan:`log_${b}(${val}) = log_${b}(${b}^${e}) = ${e}`,
+      langkah:[`${val} = ${b}^${e}`,`log_${b}(${b}^${e}) = ${e} ✅`]};
+  },
+  ()=>{
+    const f=pick([2,3,4,5,6]),a=f*rInt(2,6),bv=f*rInt(2,6),g=gcd(a,bv);
+    const w=[g*2,g+1,Math.min(a,bv),f].filter(x=>x!==g&&x>0);
+    const o=buildOpts(g,w);
+    return{soal:`FPB dari ${a} dan ${bv} adalah ...`,opsi:o.opsi,jwb:o.jwb,level:'Mudah',
+      penjelasan:`Faktorkan: ${a}=${primeFactors(a)}, ${bv}=${primeFactors(bv)}. FPB=${g}`,
+      langkah:[`${a} = ${primeFactors(a)}`,`${bv} = ${primeFactors(bv)}`,`FPB = ${g}`]};
+  },
+  ()=>{
+    const b=pick([2,3]),e1=rInt(2,4),e2=rInt(1,3);
+    const ans=Math.pow(b,e1+e2);
+    const w=[Math.pow(b,e1*e2),Math.pow(b,e1),Math.pow(b,e2),ans+1].filter(x=>x!==ans&&x>0);
+    const o=buildOpts(ans,w);
+    return{soal:`Hasil dari ${b}^${e1} × ${b}^${e2} = ...`,opsi:o.opsi,jwb:o.jwb,level:'Mudah',
+      penjelasan:`${b}^${e1} × ${b}^${e2} = ${b}^(${e1}+${e2}) = ${b}^${e1+e2} = ${ans}`,
+      langkah:[`Perkalian basis sama: pangkat dijumlah`,`${b}^${e1} × ${b}^${e2} = ${b}^${e1+e2} = ${ans}`]};
+  },
+],
+'Aljabar':[
+  ()=>{
+    const p=rInt(1,6),q=rInt(1,6),b=-(p+q),c=p*q;
+    const ans=(p+q)**2-2*p*q;
+    const w=[ans+2,ans-2,(p+q)**2,2*p*q].filter(x=>x!==ans&&x>0);
+    const o=buildOpts(ans,w);
+    const bStr=b<0?`- ${-b}`:b>0?`+ ${b}`:'';
+    return{soal:`Jika p dan q akar dari x² ${bStr} + ${c} = 0, maka p² + q² = ...`,opsi:o.opsi,jwb:o.jwb,level:'Normal',
+      penjelasan:`Vieta: p+q=${p+q}, pq=${p*q}. p²+q²=(p+q)²−2pq=${(p+q)**2}−${2*p*q}=${ans}`,
+      langkah:[`Vieta: p+q=${p+q},  pq=${p*q}`,`p²+q² = (p+q)²−2pq`,`= ${(p+q)**2} − ${2*p*q} = ${ans} ✅`]};
+  },
+  ()=>{
+    const a=1,bv=rInt(-6,6),c=rInt(-8,8),D=bv*bv-4*a*c;
+    const w=[D+4,D-4,bv*bv,4*a*c].filter(x=>x!==D);
+    const o=buildOpts(D,w);
+    const bStr=bv<0?`− ${-bv}x`:bv===0?'':bv===1?'+ x':`+ ${bv}x`;
+    const cStr=c<0?`− ${-c}`:c===0?'':c>0?`+ ${c}`:'';
+    return{soal:`Diskriminan dari x² ${bStr} ${cStr} = 0 adalah ...`,opsi:o.opsi,jwb:o.jwb,level:'Mudah',
+      penjelasan:`D = b²−4ac = (${bv})²−4(1)(${c}) = ${bv*bv}−${4*c} = ${D}`,
+      langkah:[`a=1, b=${bv}, c=${c}`,`D = b²−4ac = ${bv*bv} − ${4*a*c} = ${D}`]};
+  },
+  ()=>{
+    const x=rInt(1,6),y=rInt(1,6),a1=rInt(1,3),b1=rInt(1,3),c1=a1*x+b1*y,a2=rInt(1,3),c2=a2*x+y;
+    const w=[x+1,x-1,y,x+2].filter(v=>v!==x&&v>0);
+    const o=buildOpts(x,w);
+    return{soal:`Sistem ${a1}x+${b1}y=${c1} dan ${a2}x+y=${c2}. Nilai x = ...`,opsi:o.opsi,jwb:o.jwb,level:'Normal',
+      penjelasan:`Dari pers.2: y=${c2}−${a2}x. Substitusi ke pers.1 → x=${x}`,
+      langkah:[`y = ${c2}−${a2}x (dari pers. 2)`,`Sub ke pers.1: ${a1}x+${b1}(${c2}−${a2}x)=${c1}`,`Sederhanakan → x = ${x} ✅`]};
+  },
+  ()=>{
+    const k=rInt(2,6),n=pick([2,3,4]);
+    const ans=Math.pow(k,n);
+    const w=[k*n,k+n,ans+1,ans-1].filter(x=>x!==ans&&x>0);
+    const o=buildOpts(ans,w);
+    return{soal:`Nilai (${k}^${n}) = ...`,opsi:o.opsi,jwb:o.jwb,level:'Mudah',
+      penjelasan:`${k}^${n} = ${Array(n).fill(k).join('×')} = ${ans}`,
+      langkah:[`${k}^${n} = ${Array(n).fill(k).join(' × ')} = ${ans}`]};
+  },
+],
+'Fungsi':[
+  ()=>{
+    const a=rInt(1,5),b=rInt(-5,5),xv=rInt(1,6),ans=a*xv+b;
+    const w=[ans+1,ans-1,a*xv,xv+b].filter(v=>v!==ans);
+    const o=buildOpts(ans,w);
+    const bStr=b>=0?`+ ${b}`:b===0?'':b<0?`− ${-b}`:'';
+    return{soal:`Jika f(x)=${a}x ${b>=0?'+ '+b:'− '+(-b)}, maka f(${xv}) = ...`,opsi:o.opsi,jwb:o.jwb,level:'Mudah',
+      penjelasan:`f(${xv}) = ${a}·${xv} ${b>=0?'+ '+b:'− '+(-b)} = ${a*xv} ${b>=0?'+ '+b:'− '+(-b)} = ${ans}`,
+      langkah:[`Substitusi x=${xv}`,`f(${xv}) = ${a}(${xv}) ${b>=0?'+ '+b:'− '+(-b)} = ${ans}`]};
+  },
+  ()=>{
+    const a=rInt(1,4),b=rInt(0,5),c=rInt(1,4),d=rInt(0,4),xv=rInt(1,4);
+    const gx=c*xv+d,ans=a*gx+b;
+    const w=[ans+2,ans-2,a*xv+b,c*xv+b].filter(v=>v!==ans&&v>0);
+    const o=buildOpts(ans,w);
+    return{soal:`f(x)=${a}x+${b} dan g(x)=${c}x+${d}. Nilai (f∘g)(${xv}) = ...`,opsi:o.opsi,jwb:o.jwb,level:'Normal',
+      penjelasan:`g(${xv})=${gx}, f(g(${xv}))=f(${gx})=${a}·${gx}+${b}=${ans}`,
+      langkah:[`g(${xv}) = ${c}·${xv}+${d} = ${gx}`,`f(${gx}) = ${a}·${gx}+${b} = ${ans} ✅`]};
+  },
+  ()=>{
+    const a=rInt(2,5),b=rInt(1,8),xv=rInt(5,15);
+    const ans=(xv-b)/a;
+    if(!Number.isInteger(ans)||ans<=0) return SMART_TEMPLATES['Fungsi'][0]();
+    const w=[ans+1,ans-1,(xv+b)/a,a*xv-b].filter(v=>v!==ans&&Number.isInteger(v)&&v>0);
+    const o=buildOpts(ans,w);
+    return{soal:`Invers dari f(x)=${a}x+${b} adalah f⁻¹(x). Nilai f⁻¹(${xv}) = ...`,opsi:o.opsi,jwb:o.jwb,level:'Normal',
+      penjelasan:`f⁻¹(x)=(x−${b})/${a}. f⁻¹(${xv})=(${xv}−${b})/${a}=${ans}`,
+      langkah:[`y=${a}x+${b} → x=(y−${b})/${a}`,`f⁻¹(x)=(x−${b})/${a}`,`f⁻¹(${xv})=(${xv}−${b})/${a}=${ans} ✅`]};
+  },
+],
+'Barisan & Deret':[
+  ()=>{
+    const a=rInt(2,10),b=rInt(2,6),n=rInt(8,15),ans=a+(n-1)*b;
+    const w=[ans+b,ans-b,a+n*b,a+(n-2)*b].filter(v=>v!==ans&&v>0);
+    const o=buildOpts(ans,w);
+    return{soal:`Suku ke-${n} dari barisan ${a}, ${a+b}, ${a+2*b}, ... adalah ...`,opsi:o.opsi,jwb:o.jwb,level:'Mudah',
+      penjelasan:`a=${a}, b=${b}. U_${n}=a+(n−1)b=${a}+${n-1}×${b}=${ans}`,
+      langkah:[`a=${a}, beda b=${a+b}−${a}=${b}`,`U_n = a+(n−1)b`,`U_${n} = ${a}+(${n-1})×${b} = ${ans}`]};
+  },
+  ()=>{
+    const a=rInt(2,8),b=rInt(2,5),n=rInt(8,16),ans=n*(2*a+(n-1)*b)/2;
+    const w=[ans+n,ans-n,n*a+(n-1)*b,n*(a+(n-1)*b)].filter(v=>v!==ans&&v>0);
+    const o=buildOpts(ans,w);
+    return{soal:`Jumlah ${n} suku pertama barisan ${a}, ${a+b}, ${a+2*b}, ... adalah ...`,opsi:o.opsi,jwb:o.jwb,level:'Normal',
+      penjelasan:`S_${n}=${n}/2×(2·${a}+(${n}−1)·${b})=${n}/2×${2*a+(n-1)*b}=${ans}`,
+      langkah:[`a=${a}, b=${b}, n=${n}`,`S_n = n/2 × (2a+(n−1)b)`,`= ${n}/2 × ${2*a+(n-1)*b} = ${ans}`]};
+  },
+  ()=>{
+    const r_den=pick([2,3,4]),a=r_den*rInt(2,6);
+    const ans=a*r_den/(r_den-1);
+    if(!Number.isInteger(ans)||ans<=0) return SMART_TEMPLATES['Barisan & Deret'][1]();
+    const w=[ans+a,ans-a,a*r_den,a+a/r_den].filter(v=>v!==ans&&v>0);
+    const o=buildOpts(ans,w);
+    return{soal:`Jumlah deret tak hingga ${a} + ${a/r_den} + ${a/(r_den*r_den)} + ... adalah ...`,opsi:o.opsi,jwb:o.jwb,level:'Sulit',
+      penjelasan:`a=${a}, r=1/${r_den}. S∞=a/(1−r)=${a}/(1−1/${r_den})=${ans}`,
+      langkah:[`a=${a}, r=1/${r_den} (|r|<1 ✓)`,`S∞ = a/(1−r) = ${a}/(${r_den-1}/${r_den})`,`= ${a}×${r_den}/${r_den-1} = ${ans}`]};
+  },
+],
+'Trigonometri':[
+  ()=>{
+    const map={sin:{30:'1/2',45:'½√2',60:'½√3'},cos:{30:'½√3',45:'½√2',60:'1/2'},tan:{30:'⅓√3',45:'1',60:'√3'}};
+    const fn=pick(['sin','cos','tan']),deg=pick([30,45,60]),ans=map[fn][deg];
+    const all=['1/2','½√2','½√3','1','√3','⅓√3'];
+    const w=all.filter(v=>v!==ans).slice(0,4);
+    const pos=rInt(0,4);const vals=[...w];vals.splice(pos,0,ans);
+    const opsi=vals.slice(0,5).map((v,i)=>['A','B','C','D','E'][i]+'. '+v);
+    return{soal:`Nilai ${fn} ${deg}° adalah ...`,opsi,jwb:['A','B','C','D','E'][pos],level:'Mudah',
+      penjelasan:`${fn} ${deg}° = ${ans} (sudut istimewa)`,
+      langkah:[`Sudut ${deg}° adalah sudut istimewa`,`${fn} ${deg}° = ${ans} ✅`]};
+  },
+  ()=>{
+    const trips=[[3,4,5],[5,12,13],[8,15,17],[7,24,25]];
+    const [opp,adj,hyp]=pick(trips);
+    const ans=`${adj}/${hyp}`;
+    const w=[`${opp}/${hyp}`,`${hyp}/${adj}`,`${adj}/${opp}`,`${opp}/${adj}`];
+    const pos=rInt(0,4);const vals=[...w];vals.splice(pos,0,ans);
+    const opsi=vals.slice(0,5).map((v,i)=>['A','B','C','D','E'][i]+'. '+v);
+    return{soal:`Dalam segitiga siku-siku, sin α = ${opp}/${hyp}. Nilai cos α = ...`,opsi,jwb:['A','B','C','D','E'][pos],level:'Normal',
+      penjelasan:`sin²α+cos²α=1 → cos α=√(1−${opp*opp}/${hyp*hyp})=${adj}/${hyp}`,
+      langkah:[`sin²α = ${opp*opp}/${hyp*hyp}`,`cos²α = 1 − ${opp*opp}/${hyp*hyp} = ${adj*adj}/${hyp*hyp}`,`cos α = ${adj}/${hyp} ✅`]};
+  },
+  ()=>{
+    const a=rInt(6,12),b=rInt(4,10),c2=a*a+b*b-a*b;
+    const ans=`√${c2}`;
+    const w=[`√${c2+4}`,`√${c2-4}`,`${a+b}`,`√${a*a+b*b}`].filter(v=>v!==ans);
+    const pos=rInt(0,4);const vals=[...w.slice(0,4)];vals.splice(pos,0,ans);
+    const opsi=vals.slice(0,5).map((v,i)=>['A','B','C','D','E'][i]+'. '+v);
+    return{soal:`Segitiga ABC dengan a=${a}, b=${b}, C=60°. Panjang c = ...`,opsi,jwb:['A','B','C','D','E'][pos],level:'Sulit',
+      penjelasan:`Aturan kosinus: c²=a²+b²−2ab·cos60°=${a*a}+${b*b}−${a*b}=${c2} → c=√${c2}`,
+      langkah:[`c² = a²+b²−2ab·cos60°`,`= ${a*a}+${b*b}−2·${a}·${b}·½`,`= ${a*a}+${b*b}−${a*b} = ${c2}`,`c = √${c2} ✅`]};
+  },
+],
+'Geometri':[
+  ()=>{
+    const r=pick([3,5,7,10,14]);
+    const useInt=r===7||r===14;
+    const L=useInt?(r===7?154:616):null;
+    const Lstr=L?String(L):`${r*r}π`;
+    const wArr=useInt?(r===7?['44','308','77','44']:['308','88','1232','154']):
+                      [`${(r-1)*(r-1)}π`,`${(r+1)*(r+1)}π`,`${r*r*2}π`,`${r}π`];
+    const pos=rInt(0,4);const vals=[...wArr.slice(0,4)];vals.splice(pos,0,Lstr);
+    const opsi=vals.slice(0,5).map((v,i)=>['A','B','C','D','E'][i]+'. '+v+' cm²');
+    return{soal:`Luas lingkaran jari-jari ${r} cm (π=${useInt?'22/7':'π'}) adalah ...`,opsi,jwb:['A','B','C','D','E'][pos],level:'Mudah',
+      penjelasan:`L=πr²=${useInt?'22/7':'π'}×${r*r}=${Lstr}`,
+      langkah:[`L = πr²`,`= ${useInt?'22/7':'π'} × ${r}² = ${Lstr} cm²`]};
+  },
+  ()=>{
+    const trips=[[3,4,5],[5,12,13],[6,8,10],[8,15,17]];
+    const [dx,dy,d]=pick(trips);
+    const x1=rInt(0,4),y1=rInt(0,4),x2=x1+dx,y2=y1+dy;
+    const w=[d+1,d-1,dx+dy,d*2].filter(v=>v!==d&&v>0);
+    const o=buildOpts(d,w);
+    return{soal:`Jarak titik A(${x1},${y1}) dan B(${x2},${y2}) adalah ...`,opsi:o.opsi,jwb:o.jwb,level:'Mudah',
+      penjelasan:`d=√((${dx})²+(${dy})²)=√${dx*dx+dy*dy}=${d}`,
+      langkah:[`Δx=${dx}, Δy=${dy}`,`d=√(${dx*dx}+${dy*dy})=√${dx*dx+dy*dy}=${d} ✅`]};
+  },
+  ()=>{
+    const p=rInt(3,10),l=rInt(2,8),t=rInt(2,8),ans=p*l*t;
+    const w=[2*(p*l+p*t+l*t),p*l+l*t,ans+p,ans-l].filter(v=>v!==ans&&v>0);
+    const o=buildOpts(ans,w);
+    return{soal:`Volume balok p=${p}cm, l=${l}cm, t=${t}cm adalah ...`,opsi:o.opsi,jwb:o.jwb,level:'Mudah',
+      penjelasan:`V=p×l×t=${p}×${l}×${t}=${ans} cm³`,
+      langkah:[`V = p × l × t`,`= ${p} × ${l} × ${t} = ${ans} cm³ ✅`]};
+  },
+],
+'Statistika':[
+  ()=>{
+    let n=rInt(4,7),data=[],sum=0,ans;
+    do{data=[];sum=0;for(let i=0;i<n;i++){const v=rInt(4,15);data.push(v);sum+=v;}ans=sum/n;}while(!Number.isInteger(ans));
+    const w=[ans+1,ans-1,ans+2,Math.round(sum/2)].filter(v=>v!==ans&&v>0);
+    const o=buildOpts(ans,w);
+    return{soal:`Rata-rata dari: ${data.join(', ')} adalah ...`,opsi:o.opsi,jwb:o.jwb,level:'Mudah',
+      penjelasan:`Jumlah=${sum}, n=${n}. Mean=${sum}/${n}=${ans}`,
+      langkah:[`Jumlah = ${data.join('+')} = ${sum}`,`n = ${n}`,`Mean = ${sum}÷${n} = ${ans} ✅`]};
+  },
+  ()=>{
+    const n=pick([5,7,9]);
+    let data=[];while(data.length<n){const v=rInt(3,20);if(!data.includes(v))data.push(v);}
+    data.sort((a,b)=>a-b);
+    const ans=data[Math.floor(n/2)];
+    const w=[data[0],data[n-1],data[1],data[n-2]].filter(v=>v!==ans);
+    const o=buildOpts(ans,w);
+    return{soal:`Median dari: ${data.join(', ')} adalah ...`,opsi:o.opsi,jwb:o.jwb,level:'Mudah',
+      penjelasan:`n=${n} (ganjil), median = data ke-${Math.floor(n/2)+1} = ${ans}`,
+      langkah:[`Data terurut: ${data.join(', ')}`,`Posisi median = (${n}+1)/2 = ${(n+1)/2}`,`Median = ${ans} ✅`]};
+  },
+  ()=>{
+    const n1=rInt(10,30),m1=rInt(60,80),n2=rInt(10,25),m2=rInt(70,90);
+    const ans=Math.round((n1*m1+n2*m2)/(n1+n2));
+    const w=[Math.round((m1+m2)/2),ans+2,ans-2,m1].filter(v=>v!==ans);
+    const o=buildOpts(ans,w);
+    return{soal:`Rata-rata ${n1} siswa kelas A=${m1}, ${n2} siswa kelas B=${m2}. Rata-rata gabungan = ...`,opsi:o.opsi,jwb:o.jwb,level:'Normal',
+      penjelasan:`x̄=(${n1}×${m1}+${n2}×${m2})/${n1+n2}=${n1*m1+n2*m2}/${n1+n2}≈${ans}`,
+      langkah:[`x̄ = (n₁x̄₁+n₂x̄₂)/(n₁+n₂)`,`= (${n1*m1}+${n2*m2})/${n1+n2}`,`= ${n1*m1+n2*m2}/${n1+n2} = ${ans} ✅`]};
+  },
+],
+'Peluang':[
+  ()=>{
+    const n=rInt(5,9),r=rInt(2,4),ans=comb(n,r);
+    const w=[comb(n,r-1),comb(n,r+1),perm(n,r),ans+1].filter(v=>v!==ans&&v>0);
+    const o=buildOpts(ans,w);
+    return{soal:`Banyak cara memilih ${r} orang dari ${n} orang adalah ...`,opsi:o.opsi,jwb:o.jwb,level:'Mudah',
+      penjelasan:`C(${n},${r})=${n}!/(${r}!×${n-r}!)=${ans}`,
+      langkah:[`C(n,r)=n!/(r!(n−r)!)`,`C(${n},${r})=${ans} ✅`]};
+  },
+  ()=>{
+    const evs=[{s:'angka ganjil',n:3,a:'1/2'},{s:'angka prima',n:3,a:'1/2'},{s:'angka > 4',n:2,a:'1/3'},{s:'angka < 3',n:2,a:'1/3'},{s:'angka 6',n:1,a:'1/6'}];
+    const ev=pick(evs);
+    const w=['1/4','2/3','1/5','5/6'].filter(v=>v!==ev.a);
+    const pos=rInt(0,4);const vals=[...w.slice(0,4)];vals.splice(pos,0,ev.a);
+    const opsi=vals.slice(0,5).map((v,i)=>['A','B','C','D','E'][i]+'. '+v);
+    return{soal:`Dadu dilempar sekali. Peluang muncul ${ev.s} adalah ...`,opsi,jwb:['A','B','C','D','E'][pos],level:'Mudah',
+      penjelasan:`n(A)=${ev.n}, n(S)=6. P=${ev.n}/6=${ev.a}`,
+      langkah:[`n(S)=6`,`n(${ev.s})=${ev.n}`,`P=${ev.n}/6=${ev.a} ✅`]};
+  },
+  ()=>{
+    const n=pick([4,5,6]),k=pick([1,2,3]),pd=pick([2,3]);
+    const cb=comb(n,k),pn=1,qn=pd-1;
+    const num=cb*Math.pow(pn,k)*Math.pow(qn,n-k),den=Math.pow(pd,n);
+    const g=gcd(num,den);
+    const ans=`${num/g}/${den/g}`;
+    const w=[`${cb}/${den}`,`${num/g+1}/${den/g}`,`1/${pd}`,`${k}/${n}`].filter(v=>v!==ans);
+    const pos=rInt(0,4);const vals=[...w.slice(0,4)];vals.splice(pos,0,ans);
+    const opsi=vals.slice(0,5).map((v,i)=>['A','B','C','D','E'][i]+'. '+v);
+    return{soal:`Koin fair dilempar ${n}x. P(tepat ${k}x kepala) = ...`,opsi,jwb:['A','B','C','D','E'][pos],level:'Sulit',
+      penjelasan:`P(X=${k})=C(${n},${k})·(1/${pd})^${k}·(${qn}/${pd})^${n-k}=${ans}`,
+      langkah:[`n=${n}, k=${k}, p=1/${pd}, q=${qn}/${pd}`,`P(X=${k})=C(${n},${k})·... = ${ans} ✅`]};
+  },
+],
+'Program Linear':[
+  ()=>{
+    const a=rInt(2,5),b=rInt(1,4),M=rInt(4,8);
+    const ans=Math.max(a*M,b*M);
+    const at=a*M>=b*M?`(${M},0)`:`(0,${M})`;
+    const w=[a*M+b,b*M+a,a*b,ans-a].filter(v=>v!==ans&&v>0);
+    const o=buildOpts(ans,w);
+    return{soal:`Nilai maksimum Z=${a}x+${b}y dengan kendala x+y≤${M}, x≥0, y≥0 adalah ...`,opsi:o.opsi,jwb:o.jwb,level:'Normal',
+      penjelasan:`Titik sudut: (0,0)→0, (${M},0)→${a*M}, (0,${M})→${b*M}. Maks=${ans} di ${at}`,
+      langkah:[`Titik sudut: (0,0),(${M},0),(0,${M})`,`Z(0,0)=0, Z(${M},0)=${a*M}, Z(0,${M})=${b*M}`,`Nilai maksimum = ${ans} ✅`]};
+  },
+],
+'Matriks':[
+  ()=>{
+    const a=rInt(1,8),b=rInt(1,6),c=rInt(1,6),d=rInt(1,8),ans=a*d-b*c;
+    const w=[a*d,b*c,a*d+b*c,ans+1].filter(v=>v!==ans);
+    const o=buildOpts(ans,w);
+    return{soal:`Determinan matriks [[${a},${b}],[${c},${d}]] adalah ...`,opsi:o.opsi,jwb:o.jwb,level:'Mudah',
+      penjelasan:`Det=ad−bc=${a}·${d}−${b}·${c}=${a*d}−${b*c}=${ans}`,
+      langkah:[`Det = ad−bc`,`= ${a}×${d} − ${b}×${c}`,`= ${a*d} − ${b*c} = ${ans} ✅`]};
+  },
+  ()=>{
+    const pairs=[[2,1,1,1],[3,1,2,1],[4,1,3,1],[3,2,1,1]];
+    const [a,b,c,d]=pick(pairs),det=a*d-b*c;
+    const ans=det===1?`[[${d},${-b}],[${-c},${a}]]`:`(1/${det})[[${d},${-b}],[${-c},${a}]]`;
+    const w=[`[[${a},${b}],[${c},${d}]]`,`[[${-d},${b}],[${c},${-a}]]`,`[[${d},${b}],[${c},${a}]]`];
+    const pos=rInt(0,3);const vals=[...w.slice(0,4)];vals.splice(pos,0,ans);
+    const opsi=vals.slice(0,5).map((v,i)=>['A','B','C','D','E'][i]+'. '+v);
+    return{soal:`Invers matriks A=[[${a},${b}],[${c},${d}]] adalah ...`,opsi,jwb:['A','B','C','D','E'][pos],level:'Normal',
+      penjelasan:`Det A=${det}. A⁻¹=(1/${det})[[${d},${-b}],[${-c},${a}]]=${ans}`,
+      langkah:[`Det A = ${a}·${d}−${b}·${c} = ${det}`,`A⁻¹ = (1/det)·[[d,−b],[−c,a]]`,`= ${ans} ✅`]};
+  },
+],
+};
 
 async function generateAiSoal(topik, level) {
   const btn = document.getElementById('btn-start');
   btn.disabled = true;
   document.getElementById('soal-nav').style.display = 'none';
   answered = false;
-
-  const topikStr  = topik  || 'salah satu dari: Bilangan, Aljabar, Fungsi, Barisan & Deret, Trigonometri, Geometri, Statistika, Peluang, Program Linear, Matriks';
-  const levelStr  = level  || 'Normal';
   const container = document.getElementById('soal-container');
 
-  // ── Render pipeline skeleton ──
-  container.innerHTML = buildPipelineHTML();
-  const t0 = Date.now();
-  const ms = ()=> `${Date.now()-t0}ms`;
+  // Animasi loading
+  container.innerHTML = `
+    <div class="q-card" style="text-align:center;padding:32px 20px">
+      <div style="font-size:42px;margin-bottom:14px">⚙️</div>
+      <p style="font-weight:700;font-size:15px;margin-bottom:6px">Smart Generator menyusun soal...</p>
+      <p style="font-size:12.5px;color:var(--muted)">Variasi angka & template dipilih secara acak · 100% offline</p>
+      <div style="margin-top:18px;height:5px;background:var(--border);border-radius:4px;overflow:hidden">
+        <div id="gen-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:4px;transition:width .25s ease"></div>
+      </div>
+    </div>`;
 
-  // ── STEP 1: Validation ──
-  await setPStep('ps1','active');
-  document.getElementById('sdlc-status').textContent = 'Step 1/6 — Validasi';
-  await sleep(400);
-  if(!topikStr || !levelStr){
-    await setPStep('ps1','error'); 
-    container.innerHTML += `<div class="empty"><div class="icon">⚠️</div><p>Pilih topik dan level terlebih dahulu.</p></div>`;
-    btn.disabled=false; return;
-  }
-  await setPStep('ps1','done', ms());
+  await sleep(30);
+  const bar = document.getElementById('gen-bar');
+  if(bar) bar.style.width='40%'; await sleep(160);
+  if(bar) bar.style.width='80%'; await sleep(160);
+  if(bar) bar.style.width='100%';await sleep(100);
 
-  // ── STEP 2: Build Prompt ──
-  await setPStep('ps2','active');
-  document.getElementById('sdlc-status').textContent = 'Step 2/6 — Build Prompt';
-  await sleep(300);
+  // Pilih topik
+  const allTopics = Object.keys(SMART_TEMPLATES);
+  const topikKey  = (topik && SMART_TEMPLATES[topik]) ? topik : pick(allTopics);
+  const templates = SMART_TEMPLATES[topikKey];
 
-  const prompt = `# ROLE
-Anda adalah Profesor Matematika UTBK/SNBT Indonesia yang sangat teliti. Tugas Anda: membuat soal matematika berkualitas tinggi dengan AKURASI 100%.
+  // Pilih template berdasar level
+  let idx = level==='Mudah'?0 : level==='Normal'?Math.min(1,templates.length-1) : level==='Sulit'?Math.min(2,templates.length-1) : rInt(0,templates.length-1);
 
-# STRICT RULES (PELANGGARAN = GAGAL)
-1. ANTI-TYPO: Tidak ada typo pada angka, variabel, atau satuan.
-2. CONSISTENCY: Jawaban yang disebut sebagai kunci WAJIB sesuai hasil perhitungan matematis.
-3. OPTION CHECK: Jawaban benar WAJIB ada di dalam opsi A, B, C, D, atau E.
-4. DISTRACTOR LOGIC: 4 opsi salah berdasarkan kesalahan umum siswa, BUKAN angka acak.
-5. EXPLANATION: Pembahasan langkah demi langkah, jelas, tidak ambigu.
-6. CHAIN-OF-THOUGHT: Hitung dulu jawaban benar, verifikasi, baru tulis soal.
-
-# TOPIK & LEVEL
-- Topik: ${topikStr}
-- Level: ${levelStr}
-- Gaya: soal UTBK/SNBT penalaran matematika atau pengetahuan kuantitatif
-
-# OUTPUT (JSON ONLY — tanpa teks lain, tanpa markdown)
-{
-  "topik": "nama topik persis",
-  "level": "Mudah atau Normal atau Sulit",
-  "soal": "teks soal lengkap",
-  "opsi": ["A. ...", "B. ...", "C. ...", "D. ...", "E. ..."],
-  "jwb": "huruf A/B/C/D/E saja",
-  "penjelasan": "satu kalimat ringkas",
-  "langkah": ["Langkah 1: ...", "Langkah 2: ...", "Langkah 3: ...", "Verifikasi: ..."]
-}`;
-
-  await setPStep('ps2','done', ms());
-
-  // ── STEP 3: API Call ──
-  await setPStep('ps3','active');
-  document.getElementById('sdlc-status').textContent = 'Step 3/6 — Memanggil Claude AI...';
-
-  let rawText = '';
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type':    'application/json',
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model:      'claude-sonnet-4-20250514',
-        max_tokens: 1200,
-        messages:   [{ role:'user', content: prompt }]
-      })
-    });
-
-    if(!res.ok){
-      const err = await res.json().catch(()=>({}));
-      throw new Error(err?.error?.message || `HTTP ${res.status}`);
-    }
-    const data = await res.json();
-    rawText = (data.content||[]).map(i=>i.text||'').join('');
-    await setPStep('ps3','done', ms());
-  } catch(e){
-    await setPStep('ps3','error', ms());
-    document.getElementById('sdlc-status').textContent = '❌ API Error';
-    const errMsg = e.message||'';
-    container.innerHTML += `
-      <div class="empty" style="margin-top:0">
-        <div class="icon">⚠️</div>
-        <p style="margin-bottom:8px"><b>Koneksi ke Claude AI gagal</b></p>
-        <p style="font-size:12px;color:var(--muted)">${errMsg}</p>
-        <p style="font-size:12px;margin-top:8px">Cek koneksi internet, lalu coba lagi.</p>
-      </div>`;
-    btn.disabled=false; return;
+  // Generate soal dengan retry
+  let q = null;
+  for(let attempt=0; attempt<8; attempt++){
+    try{
+      const raw = templates[idx%templates.length]();
+      if(raw && raw.soal && Array.isArray(raw.opsi) && raw.opsi.length>=5 && raw.jwb){ q=raw; break; }
+    }catch(e){ idx++; }
   }
 
-  // ── STEP 4: Parse JSON ──
-  await setPStep('ps4','active');
-  document.getElementById('sdlc-status').textContent = 'Step 4/6 — Parse JSON';
-  await sleep(200);
-
-  let q;
-  try {
-    // Extract JSON — ambil dari { pertama sampai } terakhir
-    const start = rawText.indexOf('{');
-    const end   = rawText.lastIndexOf('}');
-    if(start===-1||end===-1) throw new Error('Tidak ada JSON di respons AI');
-    const jsonStr = rawText.slice(start, end+1);
-    q = JSON.parse(jsonStr);
-    if(!q.soal||!q.opsi||!q.jwb) throw new Error('Field wajib tidak lengkap');
-    await setPStep('ps4','done', ms());
-  } catch(e){
-    await setPStep('ps4','error', ms());
-    document.getElementById('sdlc-status').textContent = '❌ Parse gagal';
-    container.innerHTML += `<div class="empty" style="margin-top:0"><div class="icon">⚠️</div><p>AI mengembalikan format yang tidak valid. Coba generate ulang.</p><p style="font-size:11px;color:var(--muted);margin-top:6px">${e.message}</p></div>`;
-    btn.disabled=false; return;
+  // Fallback ke bank soal jika gagal
+  if(!q){
+    const fb=BANK.filter(bq=>(!topik||bq.topik===topik)&&(!level||bq.level===level));
+    q={...(fb.length>0 ? pick(fb) : pick(BANK))};
   }
 
-  // ── STEP 5: SDLC Verification ──
-  await setPStep('ps5','active');
-  document.getElementById('sdlc-status').textContent = 'Step 5/6 — Verifikasi';
-  await sleep(300);
-
-  const letters = ['A','B','C','D','E'];
-  const jwbKey  = (q.jwb||'').trim().toUpperCase().replace(/[^A-E]/g,'')[0];
-  const opsiArr = Array.isArray(q.opsi) ? q.opsi : [];
-
-  // Cek jumlah opsi
-  if(opsiArr.length < 5){
-    await setPStep('ps5','error', ms());
-    container.innerHTML += `<div class="empty" style="margin-top:0"><div class="icon">⚠️</div><p>Verifikasi gagal: opsi kurang dari 5. Coba generate ulang.</p></div>`;
-    btn.disabled=false; return;
-  }
-  // Cek jawaban valid
-  if(!letters.includes(jwbKey)){
-    await setPStep('ps5','error', ms());
-    container.innerHTML += `<div class="empty" style="margin-top:0"><div class="icon">⚠️</div><p>Verifikasi gagal: kunci jawaban "${q.jwb}" tidak valid. Coba generate ulang.</p></div>`;
-    btn.disabled=false; return;
-  }
-  // Normalize: pastikan jwb pakai huruf bersih
-  q.jwb = jwbKey;
-  // Normalize opsi — pastikan prefix A. B. dst
-  q.opsi = opsiArr.map((o,i) => {
-    const pfx = letters[i]+'. ';
-    const txt  = String(o).replace(/^[A-E]\.\s*/,'').trim();
-    return pfx + txt;
-  });
-  // Pastikan topik & level terisi
-  if(!q.topik) q.topik = topikStr.split(',')[0].trim();
-  if(!q.level)  q.level  = levelStr;
-
-  await setPStep('ps5','done', ms());
-
-  // ── STEP 6: Render ──
-  await setPStep('ps6','active');
-  document.getElementById('sdlc-status').textContent = 'Step 6/6 — Render Soal';
-  await sleep(200);
-
+  q.topik = q.topik || topikKey;
+  q.level = q.level || level || 'Normal';
   currentAiQ = q;
-  await setPStep('ps6','done', ms());
-  document.getElementById('sdlc-status').textContent = '✅ Selesai';
 
-  // Append soal di bawah pipeline (pipeline tetap terlihat)
   renderAiSoal(q);
   btn.disabled = false;
 }
 
 function renderAiSoal(q) {
   const levelClass = q.level==='Mudah'?'tag-mudah':q.level==='Normal'?'tag-normal':'tag-sulit';
-  const optHtml = q.opsi.map((o,i) => {
-    const l = ['A','B','C','D','E'][i];
+  const opsiArr = Array.isArray(q.opsi) ? q.opsi : Object.entries(q.opsi||{}).map(([k,v])=>`${k}. ${v}`);
+  const optHtml = opsiArr.map((o,i) => {
+    const l=['A','B','C','D','E'][i];
     return `<button class="opt" id="opt-${l}" onclick="piliJwb('${l}',true)" data-val="${l}">
       <span class="opt-lbl">${l}</span>
-      <span>${o.replace(/^[A-E]\.\s*/,'')}</span>
+      <span>${String(o).replace(/^[A-E]\.\s*/,'')}</span>
     </button>`;
   }).join('');
-
-  const qCard = document.createElement('div');
-  qCard.innerHTML = `
-    <div class="q-card" style="animation:fadeIn .3s ease">
+  document.getElementById('soal-container').innerHTML = `
+    <div class="q-card" style="animation:fadeIn .25s ease">
       <div class="q-meta">
-        <span class="tag tag-ai">✨ AI Generated</span>
+        <span class="tag tag-ai">🧠 Smart Generator</span>
         <span class="tag tag-topik">${q.topik}</span>
         <span class="tag ${levelClass}">${q.level}</span>
       </div>
@@ -1114,11 +1244,7 @@ function renderAiSoal(q) {
         </div>
       </div>
     </div>
-    <button class="btn btn-blue" onclick="mulaiSoal()" style="margin-top:12px;width:100%;justify-content:center">✨ Generate Soal AI Baru</button>`;
-
-  // Append setelah pipeline yang sudah ada
-  const container = document.getElementById('soal-container');
-  container.appendChild(qCard);
+    <button class="btn btn-blue" onclick="mulaiSoal()" style="margin-top:12px;width:100%;justify-content:center">🧠 Generate Soal Baru</button>`;
 }
 
 // ════════════════════════════════════════════════════════
